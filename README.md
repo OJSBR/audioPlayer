@@ -14,11 +14,6 @@ listener stopped. The original download button is left untouched.
 > **Developed and maintained by [OJSBR](https://ojsbr.com.br).** See the
 > [Credits & authorship](#credits--authorship) section below.
 
-> ⚠️ **Do not rename the plugin folder.** It must be installed as
-> `plugins/generic/audioPlayer`. PKP 3.5 derives the plugin class namespace from the
-> directory name, so a renamed folder produces a plugin that never loads. The
-> repository carries the `Omp` suffix by house convention; the folder does not.
-
 ## Compatibility & branches
 
 | Application | Version | Branch | Plugin release |
@@ -127,11 +122,6 @@ Transforma os arquivos de áudio de um livro em **audiolivro**: botão de tocar 
 de cada arquivo na página do livro, mais uma barra de player com busca dentro da faixa,
 faixa anterior/próxima, velocidade, reprodução em sequência e retomada de onde o ouvinte
 parou. O botão de download original **não é alterado**.
-
-> ⚠️ **Não renomeie a pasta do plugin.** Ele precisa ficar em
-> `plugins/generic/audioPlayer`: o PKP 3.5 deriva o namespace da classe do nome do
-> diretório, então pasta renomeada é plugin que não carrega. O sufixo `Omp` é do
-> repositório, não da pasta.
 
 ### Compatibilidade e branches
 
