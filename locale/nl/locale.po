@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: nl\n"
+
+
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Luisterboekspeler"
+
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Voegt een afspeelknop toe aan elk audiobestand op de boekpagina, met spelerbalk, zoeken binnen de track, doorlopend afspelen, instelbare snelheid en hervatten waar de luisteraar was gebleven. De downloadknop blijft ongewijzigd."
+
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Afspelen"
+
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pauzeren"
+
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Vorige track"
+
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Volgende track"
+
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Speler sluiten"
+
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Snelheid"
+
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Positie in de track"
+
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Audiospeler"
+
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Dit bestand kon niet worden afgespeeld."
+
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Deze opties gelden voor elk boek met audiobestanden bij deze uitgeverij."
+
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Speel de volgende track automatisch af als een track eindigt"
+
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Onthoud waar de luisteraar in elke track is gebleven (opgeslagen in de browser)"
+
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Aanvankelijke afspeelsnelheid"

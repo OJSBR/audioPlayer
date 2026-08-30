@@ -1,0 +1,53 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: audioPlayer\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Audiobook Player"
+
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Adds a play button to every audio file on the book page, with a player bar, in-track seeking, continuous playback, adjustable speed and resume from where the listener stopped. The download button is left untouched."
+
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Play"
+
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pause"
+
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Previous track"
+
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Next track"
+
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Close player"
+
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Speed"
+
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Position in track"
+
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Audio player"
+
+msgid "plugins.generic.audioPlayer.error"
+msgstr "This file could not be played."
+
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "These options apply to every book with audio files in this press."
+
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Play the next track automatically when one finishes"
+
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Remember where the listener stopped in each track (stored in their browser)"
+
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Initial playback speed"

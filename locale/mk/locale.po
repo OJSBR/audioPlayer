@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: mk\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Плеер за аудиокниги"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Додава копче за пуштање на секоја аудиодатотека на страницата на книгата, со лента на плеерот, движење во рамките на записот, непрекинато пуштање, прилагодлива брзина и продолжување од местото каде што слушателот застанал. Копчето за преземање останува непроменето."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Пушти"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Пауза"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Претходен запис"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Следен запис"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Затвори го плеерот"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Брзина"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Позиција во записот"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Аудиоплеер"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Оваа датотека не можеше да се пушти."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Овие опции важат за секоја книга со аудиодатотеки во ова издавачко друштво."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Автоматски пушти го следниот запис кога еден ќе заврши"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Запомни каде застанал слушателот во секој запис (се чува во неговиот прелистувач)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Почетна брзина на пуштање"

@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: eu\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Audioliburuen erreproduzitzailea"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Erreprodukzio-botoi bat gehitzen dio liburuaren orriko audio-fitxategi bakoitzari, erreproduzitzailearen barrarekin, pistaren barruko bilaketarekin, erreprodukzio jarraituarekin, abiadura doigarriarekin eta entzuleak utzi zuen tokitik jarraitzeko aukerarekin. Deskarga-botoia ez da aldatzen."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Erreproduzitu"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pausatu"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Aurreko pista"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Hurrengo pista"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Itxi erreproduzitzailea"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Abiadura"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Kokapena pistan"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Audio-erreproduzitzailea"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Ezin izan da fitxategi hau erreproduzitu."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Aukera hauek argitaletxe honetako audio-fitxategiak dituzten liburu guztiei aplikatzen zaizkie."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Erreproduzitu hurrengo pista automatikoki bat amaitzean"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Gogoratu entzuleak pista bakoitzean non utzi zuen (bere nabigatzailean gordeta)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Hasierako erreprodukzio-abiadura"

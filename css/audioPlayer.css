@@ -1,0 +1,256 @@
+/**
+ * plugins/generic/audioPlayer/css/audioPlayer.css
+ *
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
+ *
+ * Estilos do player de audiolivro. Prefixo ojsbrAudio para nao colidir
+ * com o tema da editora.
+ */
+
+/* ---------------------------------------------------------------- *
+ * Botao ao lado do link de download
+ * ---------------------------------------------------------------- */
+
+.ojsbrAudioRowButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.85rem;
+	height: 1.85rem;
+	margin-right: 0.45rem;
+	vertical-align: middle;
+	padding: 0;
+	border: 1px solid #c9ced4;
+	border-radius: 50%;
+	background: #fff;
+	color: #1c2024;
+	cursor: pointer;
+	transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.ojsbrAudioRowButton svg {
+	width: 1.1rem;
+	height: 1.1rem;
+	fill: currentColor;
+	pointer-events: none;
+}
+
+.ojsbrAudioRowButton:hover,
+.ojsbrAudioRowButton:focus-visible {
+	background: #14538c;
+	border-color: #14538c;
+	color: #fff;
+}
+
+.ojsbrAudioRowButton:focus-visible {
+	outline: 2px solid #14538c;
+	outline-offset: 2px;
+}
+
+.ojsbrAudioRowButtonActive {
+	background: #14538c;
+	border-color: #14538c;
+	color: #fff;
+}
+
+/* O layout da linha e do tema: o link de download vem posicionado em
+   absolute e o nome do arquivo fica no fluxo. So o proprio .name vira um
+   flex container, para o botao ficar ao lado do texto e nomes longos
+   quebrarem alinhados, em vez de empurrar o botao para outra linha. */
+.ojsbrAudioNameWrap {
+	display: flex;
+	align-items: center;
+}
+
+.ojsbrAudioNameWrap .ojsbrAudioRowButton {
+	flex: 0 0 auto;
+}
+
+/* Nomes de arquivo nao tem espaco onde quebrar. Sem isto, um nome longo
+   numa coluna estreita empurraria o botao para a linha de baixo. */
+.ojsbrAudioNameText {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/* ---------------------------------------------------------------- *
+ * Barra do player
+ * ---------------------------------------------------------------- */
+
+/* Espaco no fim da pagina para a barra nao cobrir o rodape. */
+body.ojsbrAudioBarOpen {
+	padding-bottom: 6rem;
+}
+
+.ojsbrAudioBar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+	padding: 0.75rem 1rem;
+	background: #1e2226;
+	color: #e8eaed;
+	box-shadow: 0 -2px 12px rgba(0, 0, 0, .25);
+	font-size: 0.9rem;
+	line-height: 1.4;
+}
+
+.ojsbrAudioControls {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex: 0 0 auto;
+}
+
+.ojsbrAudioButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	transition: background-color .15s ease;
+}
+
+.ojsbrAudioButton svg {
+	width: 1.25rem;
+	height: 1.25rem;
+	fill: currentColor;
+	pointer-events: none;
+}
+
+.ojsbrAudioButton:hover:not(:disabled),
+.ojsbrAudioButton:focus-visible {
+	background: rgba(255, 255, 255, .14);
+}
+
+.ojsbrAudioButton:focus-visible {
+	outline: 2px solid #7cb3e8;
+	outline-offset: 2px;
+}
+
+.ojsbrAudioButton:disabled {
+	opacity: .35;
+	cursor: default;
+}
+
+.ojsbrAudioButtonMain {
+	width: 2.75rem;
+	height: 2.75rem;
+	background: #14538c;
+}
+
+.ojsbrAudioButtonMain:hover:not(:disabled) {
+	background: #1a68b0;
+}
+
+.ojsbrAudioMiddle {
+	flex: 1 1 18rem;
+	min-width: 0;
+}
+
+.ojsbrAudioTitle {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+}
+
+.ojsbrAudioProgress {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.ojsbrAudioTime {
+	flex: 0 0 auto;
+	font-variant-numeric: tabular-nums;
+	font-size: 0.8rem;
+	color: #b8bec6;
+	min-width: 3.2rem;
+	text-align: center;
+}
+
+.ojsbrAudioSeek {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: 1.25rem;
+	accent-color: #7cb3e8;
+	cursor: pointer;
+}
+
+.ojsbrAudioSeek:disabled {
+	cursor: default;
+	opacity: .5;
+}
+
+.ojsbrAudioRight {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex: 0 0 auto;
+}
+
+.ojsbrAudioSpeed {
+	padding: 0.25rem 0.4rem;
+	border: 1px solid rgba(255, 255, 255, .25);
+	border-radius: 4px;
+	background: #2c3238;
+	color: inherit;
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+
+.ojsbrAudioMessage {
+	flex: 1 1 100%;
+	color: #f5a3a3;
+	font-size: 0.85rem;
+}
+
+.ojsbrAudioMessage:empty {
+	display: none;
+}
+
+/* ---------------------------------------------------------------- *
+ * Telas estreitas
+ * ---------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+	.ojsbrAudioBar {
+		gap: 0.5rem;
+		padding: 0.6rem 0.75rem;
+	}
+
+	.ojsbrAudioMiddle {
+		flex: 1 1 100%;
+		order: 3;
+	}
+
+	.ojsbrAudioRight {
+		margin-left: auto;
+	}
+
+	body.ojsbrAudioBarOpen {
+		padding-bottom: 8.5rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ojsbrAudioRowButton,
+	.ojsbrAudioButton {
+		transition: none;
+	}
+}

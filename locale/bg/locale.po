@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: bg\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Плейър за аудиокниги"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Добавя бутон за възпроизвеждане към всеки аудиофайл на страницата на книгата, с лента на плейъра, търсене в записа, непрекъснато възпроизвеждане, регулируема скорост и продължаване оттам, докъдето слушателят е стигнал. Бутонът за изтегляне остава непроменен."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Възпроизвеждане"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Пауза"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Предишен запис"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Следващ запис"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Затваряне на плейъра"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Скорост"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Позиция в записа"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Аудиоплейър"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Този файл не можа да бъде възпроизведен."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Тези настройки важат за всяка книга с аудиофайлове в това издателство."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Автоматично възпроизвеждане на следващия запис при завършване"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Запомняне докъде е стигнал слушателят във всеки запис (пази се в неговия браузър)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Начална скорост на възпроизвеждане"

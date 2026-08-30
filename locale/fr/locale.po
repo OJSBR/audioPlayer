@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: fr\n"
+
+
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Lecteur de livres audio"
+
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Ajoute un bouton de lecture à chaque fichier audio de la page du livre, avec barre de lecteur, déplacement dans la piste, lecture continue, vitesse réglable et reprise là où la personne s'était arrêtée. Le bouton de téléchargement reste inchangé."
+
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Lire"
+
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pause"
+
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Piste précédente"
+
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Piste suivante"
+
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Fermer le lecteur"
+
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Vitesse"
+
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Position dans la piste"
+
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Lecteur audio"
+
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Ce fichier n'a pas pu être lu."
+
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Ces options s'appliquent à tous les livres avec fichiers audio de cette maison d'édition."
+
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Lire automatiquement la piste suivante à la fin d'une piste"
+
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Mémoriser où la personne s'est arrêtée dans chaque piste (enregistré dans son navigateur)"
+
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Vitesse de lecture initiale"

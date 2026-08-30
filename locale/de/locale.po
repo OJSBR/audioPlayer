@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: de\n"
+
+
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Hörbuch-Player"
+
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Fügt jeder Audiodatei auf der Buchseite eine Wiedergabeschaltfläche hinzu, mit Player-Leiste, Suche innerhalb der Spur, fortlaufender Wiedergabe, einstellbarer Geschwindigkeit und Fortsetzen an der Stelle, an der die hörende Person aufgehört hat. Die Download-Schaltfläche bleibt unverändert."
+
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Wiedergeben"
+
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pause"
+
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Vorherige Spur"
+
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Nächste Spur"
+
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Player schließen"
+
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Geschwindigkeit"
+
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Position in der Spur"
+
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Audio-Player"
+
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Diese Datei konnte nicht wiedergegeben werden."
+
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Diese Optionen gelten für jedes Buch mit Audiodateien in diesem Verlag."
+
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Nächste Spur automatisch wiedergeben, wenn eine endet"
+
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Merken, wo die hörende Person in jeder Spur aufgehört hat (im Browser gespeichert)"
+
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Anfängliche Wiedergabegeschwindigkeit"

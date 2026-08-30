@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: az\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Audiokitab pleyeri"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Kitab səhifəsindəki hər audio fayla oxutma düyməsi əlavə edir: pleyer zolağı, trek daxilində axtarış, ardıcıl oxutma, tənzimlənən sürət və dinləyicinin dayandığı yerdən davam. Yükləmə düyməsi dəyişmir."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Oxut"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Fasilə"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Əvvəlki trek"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Növbəti trek"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Pleyeri bağla"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Sürət"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Trekdəki mövqe"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Audio pleyer"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Bu fayl oxudula bilmədi."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Bu seçimlər bu nəşriyyatda audio faylı olan bütün kitablara aiddir."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Bir trek bitəndə növbətisini avtomatik oxut"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Dinləyicinin hər trekdə dayandığı yeri yadda saxla (onun brauzerində saxlanılır)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "İlkin oxutma sürəti"

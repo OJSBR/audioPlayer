@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: ar\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "مشغّل الكتب الصوتية"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "يضيف زر تشغيل إلى كل ملف صوتي في صفحة الكتاب، مع شريط مشغّل، وتنقّل داخل المقطع، وتشغيل متواصل، وسرعة قابلة للضبط، واستئناف من حيث توقّف المستمع. ولا يُغيَّر زر التنزيل."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "تشغيل"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "إيقاف مؤقت"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "المقطع السابق"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "المقطع التالي"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "إغلاق المشغّل"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "السرعة"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "الموضع في المقطع"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "مشغّل الصوت"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "تعذّر تشغيل هذا الملف."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "تنطبق هذه الخيارات على كل كتاب يحتوي ملفات صوتية في هذه الدار."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "تشغيل المقطع التالي تلقائياً عند انتهاء المقطع الحالي"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "تذكّر موضع توقّف المستمع في كل مقطع (يُحفظ في متصفحه)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "سرعة التشغيل الأولية"

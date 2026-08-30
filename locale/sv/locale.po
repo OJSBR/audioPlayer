@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: sv\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Ljudboksspelare"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Lägger till en uppspelningsknapp på varje ljudfil på boksidan, med spelarrad, spolning inom spåret, kontinuerlig uppspelning, justerbar hastighet och återupptagning där lyssnaren slutade. Nedladdningsknappen lämnas oförändrad."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Spela upp"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pausa"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Föregående spår"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Nästa spår"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Stäng spelaren"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Hastighet"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Position i spåret"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Ljudspelare"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Den här filen kunde inte spelas upp."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Dessa alternativ gäller alla böcker med ljudfiler hos detta förlag."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Spela upp nästa spår automatiskt när ett spår tar slut"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Kom ihåg var lyssnaren slutade i varje spår (sparas i lyssnarens webbläsare)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Inledande uppspelningshastighet"

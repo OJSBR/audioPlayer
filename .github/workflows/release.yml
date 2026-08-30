@@ -1,0 +1,39 @@
+# Builds the installable package when a tag is pushed and attaches it to the
+# Release.
+#
+# The tarball prefix comes from <application> in version.xml, NOT from the
+# repository name. The repository carries the `Omp` suffix by house convention,
+# while the plugin must be installed in a directory named after <application>:
+# PKP 3.5 derives the plugin class namespace from the directory name
+# (APP\plugins\{category}\{dir}\{Ucfirst(dir)}Plugin), so a tarball that unpacks
+# into a suffixed directory produces a plugin that never loads.
+name: Release package
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build installable tarball
+        run: |
+          NAME="$(grep -oP '(?<=<application>)[^<]+' version.xml)"
+          TAG="${{ github.ref_name }}"
+          test -n "$NAME"
+          git archive --format=tar.gz --prefix="$NAME/" -o "$NAME-$TAG.tar.gz" HEAD
+          ls -l "$NAME-$TAG.tar.gz"
+          echo "PACKAGE=$NAME-$TAG.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Attach package to the Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.PACKAGE }}

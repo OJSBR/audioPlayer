@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: pl\n"
+
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Odtwarzacz audiobooków"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Dodaje przycisk odtwarzania do każdego pliku dźwiękowego na stronie książki, wraz z paskiem odtwarzacza, przewijaniem w obrębie ścieżki, odtwarzaniem ciągłym, regulowaną prędkością i wznowieniem w miejscu, w którym słuchacz przerwał. Przycisk pobierania pozostaje bez zmian."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Odtwórz"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Wstrzymaj"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Poprzednia ścieżka"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Następna ścieżka"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Zamknij odtwarzacz"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Prędkość"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Pozycja w ścieżce"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Odtwarzacz dźwięku"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Nie udało się odtworzyć tego pliku."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Te opcje dotyczą każdej książki z plikami dźwiękowymi w tym wydawnictwie."
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Automatycznie odtwórz następną ścieżkę po zakończeniu bieżącej"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Zapamiętaj, gdzie słuchacz przerwał każdą ścieżkę (zapisywane w jego przeglądarce)"
+
+#, fuzzy
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Początkowa prędkość odtwarzania"

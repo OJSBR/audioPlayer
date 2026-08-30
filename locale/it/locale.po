@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: OJSBR\n"
+"Language-Team: OJSBR\n"
+"Language: it\n"
+
+
+msgid "plugins.generic.audioPlayer.displayName"
+msgstr "Lettore di audiolibri"
+
+msgid "plugins.generic.audioPlayer.description"
+msgstr "Aggiunge un pulsante di riproduzione a ogni file audio della pagina del libro, con barra del lettore, spostamento all'interno della traccia, riproduzione continua, velocità regolabile e ripresa dal punto in cui chi ascolta si è fermato. Il pulsante di download resta invariato."
+
+msgid "plugins.generic.audioPlayer.play"
+msgstr "Riproduci"
+
+msgid "plugins.generic.audioPlayer.pause"
+msgstr "Pausa"
+
+msgid "plugins.generic.audioPlayer.previous"
+msgstr "Traccia precedente"
+
+msgid "plugins.generic.audioPlayer.next"
+msgstr "Traccia successiva"
+
+msgid "plugins.generic.audioPlayer.close"
+msgstr "Chiudi il lettore"
+
+msgid "plugins.generic.audioPlayer.speed"
+msgstr "Velocità"
+
+msgid "plugins.generic.audioPlayer.seek"
+msgstr "Posizione nella traccia"
+
+msgid "plugins.generic.audioPlayer.player"
+msgstr "Lettore audio"
+
+msgid "plugins.generic.audioPlayer.error"
+msgstr "Non è stato possibile riprodurre questo file."
+
+msgid "plugins.generic.audioPlayer.settings.description"
+msgstr "Queste opzioni si applicano a tutti i libri con file audio di questo editore."
+
+msgid "plugins.generic.audioPlayer.settings.autoplayNext"
+msgstr "Riproduci automaticamente la traccia successiva quando una finisce"
+
+msgid "plugins.generic.audioPlayer.settings.rememberPosition"
+msgstr "Ricorda dove chi ascolta si è fermato in ogni traccia (salvato nel suo browser)"
+
+msgid "plugins.generic.audioPlayer.settings.defaultSpeed"
+msgstr "Velocità di riproduzione iniziale"
