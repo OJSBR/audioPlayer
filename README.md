@@ -1,10 +1,12 @@
 # audioPlayer — OMP plugin
 
 [![OMP](https://img.shields.io/badge/OMP-3.5-brightgreen)](https://pkp.sfu.ca/omp/)
-[![Version](https://img.shields.io/badge/version-1.0.1.0-blue)](version.xml)
+[![Version](https://img.shields.io/badge/version-1.0.1.1-blue)](version.xml)
 [![License](https://img.shields.io/badge/license-GPL--3.0-lightgrey)](LICENSE)
 
-**⬇️ Install package:** [OMP 3.5](https://github.com/OJSBR/audioPlayerOmp/releases/download/1.0.1.0-omp3.5/audioPlayer-1.0.1.0-omp3.5.tar.gz) — or browse all [Releases](../../releases).
+**⬇️ Install package:** [OMP 3.5](https://github.com/OJSBR/audioPlayerOmp/releases/download/1.0.1.1-omp3.5/audioPlayer-1.0.1.1-omp3.5.tar.gz) — or browse all [Releases](../../releases).
+
+**▶️ Live demo:** [Editora UEMG — audiobook with 26 tracks](https://ebooks.editora.uemg.br/editora/pt_BR/catalog/book/5)
 
 Turns the audio files of a monograph into a listenable **audiobook**: a play button
 next to every audio file on the book page, plus a player bar with in-track seeking,
@@ -18,7 +20,7 @@ listener stopped. The original download button is left untouched.
 
 | Application | Version | Branch | Plugin release |
 |-------------|---------|--------|----------------|
-| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(default)* | 1.0.1.0 |
+| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(default)* | 1.0.1.1 |
 
 ## What it does
 
@@ -89,15 +91,29 @@ php ../lib/vendor/bin/phpunit --no-coverage -c phpunit.xml \
   /absolute/path/to/plugins/generic/audioPlayer/tests
 ```
 
-10 tests / 680 assertions covering the HTTP Range computation against RFC 9110 §14.1
+13 tests / 686 assertions covering the HTTP Range computation against RFC 9110 §14.1
 (closed, open, single-byte, suffix, suffix larger than the file, end past the file, and
 five unsatisfiable forms that must become `416`), audio detection by mimetype and by
-extension, mimetype resolution when the stored type is generic, and locale integrity —
-every locale carrying every key with no empty value, and no legacy locale codes, since
-in 3.5 a missing key renders as `##key##` instead of falling back to English.
+extension, mimetype resolution when the stored type is generic, locale integrity — every
+locale carrying every key with no empty value, and no legacy locale codes, since in 3.5 a
+missing key renders as `##key##` instead of falling back to English — and access control:
+the set of hooks the plugin registers is asserted exactly, all of them firing after
+`CatalogBookHandler::download` has already run the OMP access policy, and the plugin
+registers no route of its own.
 
-Cypress specs are not included yet; the browser behaviour was verified by hand against
-a real installation.
+Cypress, from the installation root:
+
+```bash
+npx cypress run \
+  --config specPattern='plugins/generic/audioPlayer/cypress/tests/functional/*.cy.js' \
+  --env contextPath=mypress,adminUsername=admin,adminPassword=secret
+```
+
+4 specs: enabling the plugin and saving its settings (reopening the form to prove the
+values persisted), building the player from the audio publication format, a `Range`
+request that must answer `206` with a correct `Content-Range` and an unsatisfiable one
+that must answer `416`, and a file that does not belong to the format, which must be
+refused with exactly the same status with and without `?audioStream=1`.
 
 ## Credits & authorship
 
@@ -123,11 +139,14 @@ de cada arquivo na página do livro, mais uma barra de player com busca dentro d
 faixa anterior/próxima, velocidade, reprodução em sequência e retomada de onde o ouvinte
 parou. O botão de download original **não é alterado**.
 
+
+**▶️ Demonstração:** [Editora UEMG — audiolivro com 26 faixas](https://ebooks.editora.uemg.br/editora/pt_BR/catalog/book/5)
+
 ### Compatibilidade e branches
 
 | Aplicação | Versão | Branch | Release do plugin |
 |-----------|--------|--------|-------------------|
-| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(padrão)* | 1.0.1.0 |
+| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(padrão)* | 1.0.1.1 |
 
 ### O que faz
 
@@ -177,16 +196,31 @@ de acesso da editora). **Nenhuma dessas regras é reimplementada.**
 
 ### Testes
 
-PHPUnit, na suíte `ApplicationPlugins` do PKP — 10 testes e 680 asserções cobrindo o
-cálculo de faixa HTTP contra a RFC 9110 §14.1 (fechada, aberta, de um byte, sufixo,
-sufixo maior que o arquivo, fim além do tamanho e as cinco formas insatisfazíveis que
-têm de virar `416`), a detecção de áudio por mimetype e por extensão, a resolução de
-mimetype quando o tipo gravado é genérico, e a integridade dos locales — todos com todas
-as chaves, sem valor vazio e sem códigos legados, já que no 3.5 chave faltante vira
-`##chave##` em vez de cair no inglês.
+PHPUnit, na suíte `ApplicationPlugins` da PKP:
 
-Ainda não há specs de Cypress; o comportamento no navegador foi verificado à mão contra
-uma instalação real.
+```bash
+cd lib/pkp/tests
+php ../lib/vendor/bin/phpunit --no-coverage -c phpunit.xml \
+  /caminho/absoluto/plugins/generic/audioPlayer/tests
+```
+
+13 testes / 686 asserções cobrindo o cálculo de faixa HTTP conforme a RFC 9110 §14.1,
+a detecção de áudio, a resolução do mimetype, a integridade dos 38 locales e o controle
+de acesso: o conjunto de hooks é conferido exatamente, todos disparando depois de o
+`CatalogBookHandler::download` já ter rodado a política de acesso do OMP.
+
+Cypress, a partir da raiz da instalação:
+
+```bash
+npx cypress run \
+  --config specPattern='plugins/generic/audioPlayer/cypress/tests/functional/*.cy.js' \
+  --env contextPath=minhaeditora,adminUsername=admin,adminPassword=senha
+```
+
+4 specs: ligar o plugin e salvar as configurações (reabrindo o formulário para provar que
+persistiu), montar o player a partir do formato de áudio, um `Range` que precisa responder
+`206` e um impossível que precisa responder `416`, e um arquivo que não pertence ao formato,
+que precisa ser recusado com o mesmo status com e sem `?audioStream=1`.
 
 ### Créditos e autoria
 

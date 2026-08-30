@@ -124,4 +124,51 @@ class AudioPlayerPluginTest extends PKPTestCase
         }
         return $out;
     }
+
+    /**
+     * O plugin nao pode ganhar um caminho proprio ate o arquivo.
+     *
+     * Toda a autorizacao do download no OMP vive em CatalogBookHandler::download:
+     * OmpPublishedSubmissionAccessPolicy, o formato disponivel, a publicacao
+     * publicada e o direct_sales_price do arquivo. O hook so e disparado depois
+     * de tudo isso passar, entao o plugin herda a checagem inteira sem repetir
+     * uma linha dela. O risco real nao e a logica de hoje, e alguem amanha mover
+     * o plugin para um hook que roda ANTES (LoadHandler, por exemplo) e abrir um
+     * caminho para o arquivo sem passar pela politica. Este teste quebra nesse dia.
+     *
+     * Verificado tambem em servidor, pedindo o mesmo mp3 com ?audioStream=1:
+     * arquivo liberado 206; direct_sales_price NULL 404; formato indisponivel
+     * 404; publicacao nao publicada 404 — identico ao download normal.
+     */
+    public function testSoEnganchaEmHooksPosAutorizacao(): void
+    {
+        $codigo = file_get_contents(self::DIR . '/AudioPlayerPlugin.php');
+        preg_match_all("/Hook::add\\(\\s*'([^']+)'/", $codigo, $m);
+        $esperados = [
+            'CatalogBookHandler::download',   // disparado apos toda a politica de acesso
+            'TemplateManager::display',
+            'Templates::Catalog::Book::Main',
+        ];
+        sort($esperados);
+        $achados = array_unique($m[1]);
+        sort($achados);
+        $this->assertSame($esperados, $achados, 'conjunto de hooks mudou: revisar o acesso antes de aceitar');
+    }
+
+    /** Nenhum roteamento proprio, que serviria arquivo fora da politica do core. */
+    public function testNaoRegistraRotaPropria(): void
+    {
+        $codigo = file_get_contents(self::DIR . '/AudioPlayerPlugin.php');
+        foreach (['LoadHandler', 'LoadComponentHandler', 'Dispatcher::'] as $proibido) {
+            $this->assertStringNotContainsString($proibido, $codigo, "o plugin nao pode registrar rota propria ({$proibido})");
+        }
+    }
+
+    /** Sem arquivo no hook o plugin declina em vez de improvisar. */
+    public function testDeclinaSemArquivo(): void
+    {
+        $plugin = new AudioPlayerPlugin();
+        $this->assertFalse($plugin->streamAudio('CatalogBookHandler::download', [null, null, null, null, false]));
+        $this->assertFalse($plugin->streamAudio('CatalogBookHandler::download', []));
+    }
 }

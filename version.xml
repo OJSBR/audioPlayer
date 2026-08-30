@@ -12,8 +12,8 @@
 <version>
 	<application>audioPlayer</application>
 	<type>plugins.generic</type>
-	<release>1.0.1.0</release>
-	<date>2026-08-29</date>
+	<release>1.0.1.1</release>
+	<date>2026-08-30</date>
 	<lazy-load>1</lazy-load>
 	<sitewide>0</sitewide>
 	<class>AudioPlayerPlugin</class>
