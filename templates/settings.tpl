@@ -1,10 +1,10 @@
 {**
  * plugins/generic/audioPlayer/templates/settings.tpl
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @brief Formulario de configuracao do player de audiolivro.
+ * Settings of the audiobook player.
  *}
 <script>
 	$(function() {ldelim}
@@ -13,7 +13,7 @@
 </script>
 
 <form class="pkp_form" id="audioPlayerSettings" method="post"
-      action="{url router=$smarty.const.ROUTE_COMPONENT op="manage" category="generic" plugin=$pluginName verb="settings" save=true}">
+      action="{url router=PKP\core\PKPApplication::ROUTE_COMPONENT op="manage" category="generic" plugin=$pluginName verb="settings" save=true}">
 	{csrf}
 	{include file="controllers/notification/inPlaceNotification.tpl" notificationId="audioPlayerSettingsNotification"}
 

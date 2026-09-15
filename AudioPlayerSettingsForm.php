@@ -3,14 +3,12 @@
 /**
  * @file plugins/generic/audioPlayer/AudioPlayerSettingsForm.php
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class AudioPlayerSettingsForm
  *
- * @ingroup plugins_generic_audioPlayer
- *
- * @brief Configuracao do player por editora.
+ * @brief Player settings of a press.
  */
 
 namespace APP\plugins\generic\audioPlayer;
@@ -22,17 +20,11 @@ use PKP\form\validation\FormValidatorPost;
 
 class AudioPlayerSettingsForm extends Form
 {
-    /** Velocidades oferecidas na barra do player. */
+    /** Speeds offered in the player bar. */
     public const SPEEDS = ['0.75', '1', '1.25', '1.5', '1.75', '2'];
 
-    public int $contextId;
-
-    public AudioPlayerPlugin $plugin;
-
-    public function __construct(AudioPlayerPlugin $plugin, int $contextId)
+    public function __construct(private AudioPlayerPlugin $plugin, private int $contextId)
     {
-        $this->contextId = $contextId;
-        $this->plugin = $plugin;
         parent::__construct($plugin->getTemplateResource('settings.tpl'));
 
         $this->addCheck(new FormValidatorPost($this));
@@ -40,7 +32,7 @@ class AudioPlayerSettingsForm extends Form
     }
 
     /**
-     * @copydoc Form::initData()
+     * Load the current settings of the press, with the defaults.
      */
     public function initData()
     {
@@ -56,7 +48,7 @@ class AudioPlayerSettingsForm extends Form
     }
 
     /**
-     * @copydoc Form::readInputData()
+     * Read the submitted settings.
      */
     public function readInputData()
     {
@@ -65,7 +57,7 @@ class AudioPlayerSettingsForm extends Form
     }
 
     /**
-     * @copydoc Form::fetch()
+     * Render the form.
      *
      * @param null|mixed $template
      */
@@ -80,7 +72,7 @@ class AudioPlayerSettingsForm extends Form
     }
 
     /**
-     * @copydoc Form::execute()
+     * Save the settings; an unknown speed falls back to 1x.
      */
     public function execute(...$functionArgs)
     {

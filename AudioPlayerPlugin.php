@@ -3,44 +3,35 @@
 /**
  * @file plugins/generic/audioPlayer/AudioPlayerPlugin.php
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class AudioPlayerPlugin
  *
- * @ingroup plugins_generic_audioPlayer
+ * @brief Audiobook player for the book page of the OMP catalogue.
  *
- * @brief Player de audiolivro para a pagina do livro no catalogo do OMP.
+ * Adds a play/pause button to every audio file of a publication format and a
+ * player bar with seeking, previous/next track, playback speed, continuous
+ * play and resuming where the listener stopped. The core download link is not
+ * changed.
  *
- *        Acrescenta um botao tocar/pausar em cada arquivo de audio de um
- *        formato de publicacao e uma barra de player com busca na faixa,
- *        faixa anterior/proxima, velocidade de reproducao, reproducao em
- *        sequencia e retomada da posicao onde o ouvinte parou.
+ * Two parts:
  *
- *        O botao de download original nao e alterado.
+ *   1. Streaming with HTTP Range. The core file service answers
+ *      `Accept-Ranges: none`, which rules out seeking and resuming. The plugin
+ *      takes over the response in `CatalogBookHandler::download`, which is only
+ *      called AFTER the core has checked access (format available, publication
+ *      published, open access or paid purchase, press restrictions). No
+ *      authorization rule is repeated here.
  *
- *        Duas pecas:
- *
- *          1. Um endpoint de streaming com suporte a HTTP Range. O
- *             PKPFileService responde `Accept-Ranges: none`, o que impede
- *             busca dentro da faixa e retomada. O plugin assume a resposta
- *             pelo hook `CatalogBookHandler::download`, que so e disparado
- *             DEPOIS de toda a validacao de acesso do core (formato
- *             disponivel, publicacao publicada, acesso aberto ou compra
- *             paga, restricao de acesso da editora). Nenhuma regra de
- *             autorizacao e reimplementada aqui.
- *
- *          2. CSS e JS injetados apenas na pagina do livro, que enriquecem
- *             as linhas de download ja renderizadas pelo core.
- *
- *        Compatibilidade: OMP 3.5.x.
+ *   2. A stylesheet and a script added only to the book page, which enhance the
+ *      download rows the core has already rendered.
  */
 
 namespace APP\plugins\generic\audioPlayer;
 
 use APP\core\Application;
 use APP\template\TemplateManager;
-use PKP\config\Config;
 use PKP\core\JSONMessage;
 use PKP\core\PKPApplication;
 use PKP\linkAction\LinkAction;
@@ -50,26 +41,26 @@ use PKP\plugins\Hook;
 
 class AudioPlayerPlugin extends GenericPlugin
 {
-    /** Template da pagina publica do livro. */
+    /** Template of the public book page. */
     private const BOOK_TEMPLATE = 'frontend/pages/book.tpl';
 
-    /** Parametro que marca a requisicao como reproducao, e nao download. */
+    /** Query parameter that marks a request as playback rather than download. */
     private const STREAM_PARAM = 'audioStream';
 
-    /** Tamanho do bloco lido do disco a cada iteracao do streaming. */
-    private const CHUNK_SIZE = 262144; // 256 KB
+    /** Bytes read from the disk at each iteration of the stream. */
+    private const CHUNK_SIZE = 262144;
 
     /**
-     * Extensoes tratadas como audio quando o mimetype registrado nao ajuda.
-     * O OMP as vezes grava application/octet-stream para arquivos enviados.
+     * Extensions treated as audio when the stored mimetype does not help: OMP
+     * sometimes stores application/octet-stream for uploaded files.
      */
     private const AUDIO_EXTENSIONS = [
         'mp3', 'm4a', 'm4b', 'aac', 'ogg', 'oga', 'opus', 'wav', 'flac', 'weba',
     ];
 
     /**
-     * Mimetype correto para cada extensao, usado quando o registrado e
-     * generico. Sem isso o navegador recusa tocar octet-stream.
+     * Mimetype sent for each extension when the stored one is generic: browsers
+     * refuse to play application/octet-stream.
      */
     private const EXTENSION_MIME = [
         'mp3' => 'audio/mpeg',
@@ -85,212 +76,167 @@ class AudioPlayerPlugin extends GenericPlugin
     ];
 
     /**
-     * @copydoc Plugin::register()
+     * Register the plugin and, where it is enabled, its hooks.
      *
-     * @param null|mixed $mainContextId
+     * @param string $category
+     * @param string $path
+     * @param null|int $mainContextId
      */
-    public function register($category, $path, $mainContextId = null)
+    public function register($category, $path, $mainContextId = null): bool
     {
         $success = parent::register($category, $path, $mainContextId);
-
-        // Nao registra durante instalacao/upgrade.
-        if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE')) {
+        // Only reader-facing requests of a press reach these hooks.
+        if (!$success || Application::isUnderMaintenance() || !$this->getEnabled($mainContextId)) {
             return $success;
         }
 
-        if ($success && $this->getEnabled($mainContextId)) {
-            // Assume a entrega do arquivo quando a requisicao e de reproducao.
-            Hook::add('CatalogBookHandler::download', $this->streamAudio(...));
-
-            // Carrega CSS e JS somente na pagina do livro.
-            Hook::add('TemplateManager::display', $this->addAssets(...));
-
-            // Injeta o container com a lista de faixas dentro da pagina.
-            Hook::add('Templates::Catalog::Book::Main', $this->injectPlayerData(...));
-        }
+        Hook::add('CatalogBookHandler::download', $this->streamAudio(...));
+        Hook::add('TemplateManager::display', $this->addAssets(...));
+        Hook::add('Templates::Catalog::Book::Main', $this->injectPlayerData(...));
 
         return $success;
     }
 
     /**
-     * Nome estavel no registry e nas URLs do gerenciador de plugins.
-     * Com namespace, o getName() padrao devolveria o FQCN em minusculas.
-     *
-     * @copydoc Plugin::getName()
+     * Name shown in the plugins list.
      */
-    public function getName()
-    {
-        return 'audioplayerplugin';
-    }
-
-    /**
-     * @copydoc Plugin::getDisplayName()
-     */
-    public function getDisplayName()
+    public function getDisplayName(): string
     {
         return __('plugins.generic.audioPlayer.displayName');
     }
 
     /**
-     * @copydoc Plugin::getDescription()
+     * Description shown in the plugins list.
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return __('plugins.generic.audioPlayer.description');
     }
 
     /**
-     * Botao "Configuracoes" na linha do plugin.
-     *
-     * @copydoc Plugin::getActions()
+     * Add the settings action to the plugin entry in the plugins list.
      */
-    public function getActions($request, $verb)
+    public function getActions($request, $verb): array
     {
         $actions = parent::getActions($request, $verb);
-        if (!$this->getEnabled()) {
+        if (!$request->getContext() || !$this->getEnabled()) {
             return $actions;
         }
-        $router = $request->getRouter();
-        array_unshift($actions, new LinkAction(
-            'settings',
-            new AjaxModal(
-                $router->url($request, null, null, 'manage', null, [
-                    'verb' => 'settings',
-                    'plugin' => $this->getName(),
-                    'category' => 'generic',
-                ]),
-                $this->getDisplayName()
-            ),
-            __('manager.plugins.settings'),
-            null
-        ));
+
+        $url = $request->getRouter()->url($request, null, null, 'manage', null, [
+            'verb' => 'settings',
+            'plugin' => $this->getName(),
+            'category' => 'generic',
+        ]);
+        array_unshift($actions, new LinkAction('settings', new AjaxModal($url, $this->getDisplayName()), __('manager.plugins.settings')));
+
         return $actions;
     }
 
     /**
-     * @copydoc Plugin::manage()
+     * Show and save the settings form.
      */
-    public function manage($args, $request)
+    public function manage($args, $request): JSONMessage
     {
-        if ($request->getUserVar('verb') !== 'settings') {
+        // The settings belong to a press; there is nothing to configure site-wide.
+        if ($request->getUserVar('verb') !== 'settings' || !$request->getContext()) {
             return parent::manage($args, $request);
         }
 
-        $context = $request->getContext();
-        if (!$context) {
-            return new JSONMessage(false);
-        }
-
-        $form = new AudioPlayerSettingsForm($this, $context->getId());
-
-        if ($request->getUserVar('save')) {
-            $form->readInputData();
-            if ($form->validate()) {
-                $form->execute();
-                return new JSONMessage(true);
-            }
-        } else {
+        $form = new AudioPlayerSettingsForm($this, $request->getContext()->getId());
+        if (!$request->getUserVar('save')) {
             $form->initData();
+            return new JSONMessage(true, $form->fetch($request));
         }
-        return new JSONMessage(true, $form->fetch($request));
+
+        $form->readInputData();
+        if (!$form->validate()) {
+            return new JSONMessage(true, $form->fetch($request));
+        }
+
+        $form->execute();
+
+        return new JSONMessage(true);
     }
 
     /**
-     * Carrega CSS e JS apenas na pagina publica do livro.
+     * Add the stylesheet and the script to the public book page only.
      *
-     * @param array  $args     [$templateMgr, &$template, &$sendContentType, &$charset, &$output]
+     * @param string $hookName
+     * @param array $args [$templateMgr, $template, $sendContentType, $charset, $output]
      */
-    public function addAssets(string $hookName, array $args): bool
+    public function addAssets($hookName, $args): bool
     {
         if (($args[1] ?? null) !== self::BOOK_TEMPLATE) {
-            return false;
+            return Hook::CONTINUE;
         }
 
         $request = Application::get()->getRequest();
         $templateMgr = TemplateManager::getManager($request);
         $base = $request->getBaseUrl() . '/' . $this->getPluginPath();
 
-        // O PKP so acrescenta ?v={versao do OMP} quando a URL nao tem query.
-        // Versionar pela versao do plugin faz o navegador buscar o arquivo
-        // novo a cada atualizacao, em vez de servir o CSS/JS antigo do cache.
+        // PKP only appends ?v={application version} to URLs without a query. The
+        // plugin version makes browsers fetch the new files after each update.
         $version = $this->getCurrentVersion();
-        $stamp = '?v=' . urlencode($version ? $version->getVersionString() : '1.0.0.0');
+        $stamp = '?v=' . urlencode($version ? $version->getVersionString() : '0');
 
-        $templateMgr->addStyleSheet(
-            'audioPlayer',
-            $base . '/css/audioPlayer.css' . $stamp,
-            ['contexts' => ['frontend']]
-        );
-        $templateMgr->addJavaScript(
-            'audioPlayer',
-            $base . '/js/audioPlayer.js' . $stamp,
-            ['contexts' => ['frontend']]
-        );
+        $templateMgr->addStyleSheet('audioPlayer', $base . '/css/audioPlayer.css' . $stamp, ['contexts' => ['frontend']]);
+        $templateMgr->addJavaScript('audioPlayer', $base . '/js/audioPlayer.js' . $stamp, ['contexts' => ['frontend']]);
 
-        return false;
+        return Hook::CONTINUE;
     }
 
     /**
-     * Injeta na pagina um elemento com a lista de faixas de audio em JSON.
-     * O JS le esse elemento e enriquece as linhas ja renderizadas pelo core.
+     * Add an element with the audio track list in JSON to the book page. The
+     * script reads it and enhances the rows the core has rendered. A book
+     * without audio tracks gets nothing.
      *
-     * Sem faixas de audio no livro, nada e injetado.
-     *
-     * @param array  $args     [$params, $smarty, &$output]
+     * @param string $hookName
+     * @param array $args [$params, $smarty, &$output]
      */
-    public function injectPlayerData(string $hookName, array $args): bool
+    public function injectPlayerData($hookName, $args): bool
     {
         $smarty = $args[1] ?? null;
         $output = &$args[2];
         if (!$smarty) {
-            return false;
+            return Hook::CONTINUE;
         }
 
-        // publicationFormats e availableFiles sao atribuidos pelo handler no
-        // template manager, entao sao visiveis aqui. Ja $monograph chega ao
-        // monograph_full.tpl como parametro de {include}, de escopo local, e
-        // nao aparece em getTemplateVars(). A submissao vem do handler.
+        // publicationFormats and availableFiles are assigned by the handler to the
+        // template manager, so they are visible here. The monograph reaches
+        // monograph_full.tpl as an {include} parameter, which is local and not in
+        // getTemplateVars(), so the submission comes from the handler.
         $formats = $smarty->getTemplateVars('publicationFormats');
         $files = $smarty->getTemplateVars('availableFiles');
         if (empty($formats) || empty($files)) {
-            return false;
+            return Hook::CONTINUE;
         }
 
         $request = Application::get()->getRequest();
         $handler = $request->getRouter()->getHandler();
-        if (!$handler) {
-            return false;
-        }
-        $monograph = $handler->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
-        if (!$monograph) {
-            return false;
-        }
-        $publication = $handler->publication ?? $monograph->getCurrentPublication();
+        $monograph = $handler ? $handler->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION) : null;
+        $publication = $monograph ? ($handler->publication ?? $monograph->getCurrentPublication()) : null;
         if (!$publication) {
-            return false;
+            return Hook::CONTINUE;
         }
 
         $payload = $this->buildTrackList($formats, $files, $monograph, $publication);
         if (empty($payload['formats'])) {
-            return false;
+            return Hook::CONTINUE;
         }
 
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $output .= '<div class="ojsbrAudioPlayerData" hidden data-config="'
-            . htmlspecialchars($json, ENT_QUOTES, 'UTF-8') . '"></div>';
+        $output .= '<div class="ojsbrAudioPlayerData" hidden data-config="' . htmlspecialchars($json, ENT_QUOTES, 'UTF-8') . '"></div>';
 
-        return false;
+        return Hook::CONTINUE;
     }
 
     /**
-     * Monta a lista de faixas agrupada por formato de publicacao.
+     * The track list grouped by publication format, in the order the core lists
+     * the files, which is the order the press set for the format.
      *
-     * A ordem e a mesma em que o core lista os arquivos, que ja e a ordem
-     * definida pela editora no formato. Nomes do tipo "001_Abertura.mp3"
-     * ficam naturalmente na sequencia certa.
-     *
-     * @param array $formats     PublicationFormat[]
-     * @param array $files       SubmissionFile[]
+     * @param array $formats PublicationFormat[]
+     * @param array $files SubmissionFile[]
      */
     private function buildTrackList(array $formats, array $files, $monograph, $publication): array
     {
@@ -315,19 +261,17 @@ class AudioPlayerPlugin extends GenericPlugin
 
                 $path = [$monograph->getBestId()];
                 if (!$isCurrent) {
-                    $path[] = 'version';
-                    $path[] = $publication->getId();
+                    array_push($path, 'version', $publication->getId());
                 }
-                $path[] = $format->getBestId();
-                $path[] = $file->getBestId();
+                array_push($path, $format->getBestId(), $file->getBestId());
 
                 $tracks[] = [
                     'id' => (int) $file->getId(),
                     'name' => $name,
-                    // URL identica a do link de download ja presente na pagina,
-                    // usada pelo JS para localizar a linha correspondente.
+                    // Same URL as the download link already in the page, used by the
+                    // script to find the matching row.
                     'viewUrl' => $dispatcher->url($request, PKPApplication::ROUTE_PAGE, null, 'catalog', 'view', $path),
-                    // URL de reproducao: mesmo controle de acesso, com Range.
+                    // Playback URL: same access control, with Range support.
                     'streamUrl' => $dispatcher->url($request, PKPApplication::ROUTE_PAGE, null, 'catalog', 'download', $path, [
                         'inline' => 1,
                         self::STREAM_PARAM => 1,
@@ -343,7 +287,7 @@ class AudioPlayerPlugin extends GenericPlugin
             }
         }
 
-        $contextId = $request->getContext() ? $request->getContext()->getId() : null;
+        $contextId = $request->getContext()?->getId();
 
         return [
             'submissionId' => (int) $monograph->getId(),
@@ -366,56 +310,51 @@ class AudioPlayerPlugin extends GenericPlugin
     }
 
     /**
-     * Setting da editora com valor padrao quando nunca foi gravado.
-     * getSetting() devolve null tanto para "nao configurado" quanto para
-     * um valor vazio; so o primeiro caso deve cair no padrao.
+     * A press setting, or the default when it was never saved. getSetting()
+     * returns null for "never saved" only.
      */
-    private function getSettingWithDefault(?int $contextId, string $name, $default)
+    private function getSettingWithDefault(?int $contextId, string $name, mixed $default): mixed
     {
         if ($contextId === null) {
             return $default;
         }
         $value = $this->getSetting($contextId, $name);
+
         return $value === null ? $default : $value;
     }
 
     /**
-     * Entrega o arquivo de audio com suporte a HTTP Range.
+     * Send the audio file honouring HTTP Range.
      *
-     * Este hook so e alcancado depois que o CatalogBookHandler validou:
-     * formato de publicacao disponivel e nao remoto, publicacao publicada,
-     * arquivo pertencente ao formato, acesso aberto ou compra paga, e a
-     * restricao de acesso da editora. Nenhuma dessas regras e refeita aqui.
+     * The hook is only reached after CatalogBookHandler has checked that the
+     * format is available and not remote, the publication is published, the file
+     * belongs to the format, access is open or paid for, and the press
+     * restrictions. None of those rules is repeated here.
      *
-     * So assume a resposta quando a requisicao traz o parametro de
-     * reproducao E o arquivo e de fato audio; qualquer outro caso segue
-     * pelo caminho normal do core, com o download intacto.
+     * The response is taken over only when the request carries the playback
+     * parameter AND the file is audio; anything else follows the core path with
+     * the download untouched.
      *
-     * @param array  $args     [&$handler, &$submission, &$publicationFormat, &$submissionFile, &$inline]
-     *
-     * @return bool true quando o plugin respondeu (o core entao encerra)
+     * @param string $hookName
+     * @param array $args [$handler, $submission, $publicationFormat, $submissionFile, $inline]
      */
-    public function streamAudio(string $hookName, array $args): bool
+    public function streamAudio($hookName, $args): bool
     {
         $submissionFile = $args[3] ?? null;
-        if (!$submissionFile) {
-            return false;
-        }
-
         $request = Application::get()->getRequest();
-        if (!$request->getUserVar(self::STREAM_PARAM)) {
-            return false;
+        if (!$submissionFile || !$request->getUserVar(self::STREAM_PARAM)) {
+            return Hook::CONTINUE;
         }
 
         $fileService = app()->get('file');
         $file = $fileService->get($submissionFile->getData('fileId'));
         if (!$file) {
-            return false;
+            return Hook::CONTINUE;
         }
 
         $name = $submissionFile->getLocalizedData('name');
         if (!self::isAudioFile($file->mimetype ?? null, $name, $file->path)) {
-            return false;
+            return Hook::CONTINUE;
         }
 
         return $this->sendRangeResponse(
@@ -423,13 +362,13 @@ class AudioPlayerPlugin extends GenericPlugin
             $file->path,
             self::resolveMimetype($file->mimetype ?? null, $name, $file->path),
             $fileService->formatFilename($file->path, $name)
-        );
+        ) ? Hook::ABORT : Hook::CONTINUE;
     }
 
     /**
-     * Escreve a resposta HTTP honrando o cabecalho Range.
+     * Write the HTTP response honouring the Range header.
      *
-     * @return bool true se a resposta foi enviada
+     * @return bool False when the file cannot be read, so the core answers instead
      */
     private function sendRangeResponse($fileService, string $path, string $mimetype, string $filename): bool
     {
@@ -443,16 +382,16 @@ class AudioPlayerPlugin extends GenericPlugin
             return false;
         }
 
-        $faixa = self::resolveRange($_SERVER['HTTP_RANGE'] ?? '', $size);
-        if ($faixa === false) {
-            return $this->sendUnsatisfiable($size);
+        $range = self::resolveRange($_SERVER['HTTP_RANGE'] ?? '', $size);
+        if ($range === false) {
+            $this->sendUnsatisfiable($size);
         }
-        [$start, $end, $partial] = $faixa;
+        [$start, $end, $partial] = $range;
 
         $length = $end - $start + 1;
         $etag = '"' . md5($path . ':' . $size) . '"';
 
-        // Buffers e compressao atrapalham o streaming por faixa.
+        // Output buffers and compression get in the way of a ranged stream.
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
@@ -484,8 +423,8 @@ class AudioPlayerPlugin extends GenericPlugin
             return false;
         }
 
-        // O adaptador local devolve um stream de arquivo real, que aceita
-        // fseek. Se algum dia nao aceitar, descarta os bytes iniciais lendo.
+        // The local adapter returns a real file stream, which can seek. Should it
+        // ever not, the leading bytes are read and discarded.
         if ($start > 0 && fseek($stream, $start) !== 0) {
             $skipped = 0;
             while ($skipped < $start && !feof($stream)) {
@@ -497,7 +436,7 @@ class AudioPlayerPlugin extends GenericPlugin
             }
         }
 
-        // Interrompe a leitura se o ouvinte fechar a pagina ou pular a faixa.
+        // Stop reading when the listener closes the page or skips the track.
         ignore_user_abort(false);
 
         $remaining = $length;
@@ -515,9 +454,9 @@ class AudioPlayerPlugin extends GenericPlugin
     }
 
     /**
-     * Responde 416 quando a faixa pedida nao existe no arquivo.
+     * Answer 416 when the requested range is not in the file.
      */
-    private function sendUnsatisfiable(int $size): bool
+    private function sendUnsatisfiable(int $size): never
     {
         while (ob_get_level() > 0) {
             ob_end_clean();
@@ -529,28 +468,23 @@ class AudioPlayerPlugin extends GenericPlugin
     }
 
     /**
-     * O arquivo e audio? Considera o mimetype registrado e, quando ele e
-     * generico (o OMP grava application/octet-stream em alguns envios),
-     * a extensao do nome exibido ou do arquivo em disco.
-     */
-    /**
-     * Calcula a faixa a servir a partir do cabecalho Range.
+     * The range to send for a Range header (RFC 9110, section 14.1).
      *
-     * Puro de proposito: e a regra mais delicada do plugin (RFC 9110 secao
-     * 14.1) e a unica que o navegador exercita a cada arrasto da barra de
-     * progresso. Separada do I/O, da para cobrir por teste sem servidor.
+     * Kept free of I/O on purpose: it is the most delicate rule of the plugin and
+     * the one browsers exercise on every drag of the progress bar.
      *
-     * @return array{0:int,1:int,2:bool}|false [inicio, fim, parcial] ou false
-     *         quando a faixa e insatisfazivel (deve virar 416).
+     * @return array{0:int,1:int,2:bool}|false [start, end, partial], or false when
+     *                                         the range cannot be satisfied (416)
      */
-    public static function resolveRange(string $header, int $size)
+    public static function resolveRange(string $header, int $size): array|false
     {
         $start = 0;
         $end = $size - 1;
 
         $header = trim($header);
         if ($header === '' || !preg_match('/^bytes=(\d*)-(\d*)$/', $header, $m)) {
-            return [$start, $end, false];   // sem faixa: resposta inteira, 200
+            // No range: the whole file, 200.
+            return [$start, $end, false];
         }
 
         [$from, $to] = [$m[1], $m[2]];
@@ -558,7 +492,7 @@ class AudioPlayerPlugin extends GenericPlugin
             return false;
         }
         if ($from === '') {
-            // Sufixo: os ultimos N bytes.
+            // Suffix: the last N bytes.
             $length = (int) $to;
             if ($length <= 0) {
                 return false;
@@ -573,38 +507,45 @@ class AudioPlayerPlugin extends GenericPlugin
         if ($start > $end || $start >= $size) {
             return false;
         }
+
         return [$start, $end, true];
     }
 
+    /**
+     * Whether a file is audio: the stored mimetype, or the extension of the
+     * displayed name or of the stored file when the mimetype is generic.
+     */
     public static function isAudioFile(?string $mimetype, ?string $name, ?string $path): bool
     {
         if ($mimetype && str_starts_with(strtolower($mimetype), 'audio/')) {
             return true;
         }
+
         return in_array(self::extensionOf($name) ?: self::extensionOf($path), self::AUDIO_EXTENSIONS, true);
     }
 
     /**
-     * Mimetype a enviar. Um audio servido como application/octet-stream
-     * nao toca no navegador, entao a extensao tem a palavra final.
+     * The mimetype to send. Audio sent as application/octet-stream does not play
+     * in browsers, so the extension has the last word.
      */
     public static function resolveMimetype(?string $mimetype, ?string $name, ?string $path): string
     {
-        $ext = self::extensionOf($name) ?: self::extensionOf($path);
-        if (isset(self::EXTENSION_MIME[$ext])) {
-            return self::EXTENSION_MIME[$ext];
+        $extension = self::extensionOf($name) ?: self::extensionOf($path);
+        if (isset(self::EXTENSION_MIME[$extension])) {
+            return self::EXTENSION_MIME[$extension];
         }
         if ($mimetype && str_starts_with(strtolower($mimetype), 'audio/')) {
             return $mimetype;
         }
+
         return 'application/octet-stream';
     }
 
+    /**
+     * The lower-case extension of a file name, or an empty string.
+     */
     public static function extensionOf(?string $filename): string
     {
-        if (!$filename) {
-            return '';
-        }
-        return strtolower(pathinfo($filename, PATHINFO_EXTENSION) ?: '');
+        return $filename ? strtolower(pathinfo($filename, PATHINFO_EXTENSION) ?: '') : '';
     }
 }

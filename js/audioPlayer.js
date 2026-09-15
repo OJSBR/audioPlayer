@@ -1,14 +1,14 @@
 /**
- * plugins/generic/audioPlayer/js/audioPlayer.js
+ * @file plugins/generic/audioPlayer/js/audioPlayer.js
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * Player de audiolivro da pagina do livro.
+ * Audiobook player for the book page.
  *
- * Le a lista de faixas injetada pelo plugin, acrescenta um botao
- * tocar/pausar ao lado de cada link de download de audio e monta uma barra
- * de player fixa. Sem dependencia externa.
+ * Reads the track list injected by the plugin, adds a play/pause button
+ * next to each audio download link and builds a fixed player bar.
+ * No external dependencies.
  */
 (function () {
 	'use strict';
@@ -31,9 +31,9 @@
 	var t = cfg.i18n || {};
 	var SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
-	/* Faixas em ordem de pagina, com o formato a que pertencem. A sequencia
-	   automatica so avanca dentro do mesmo formato: um audiolivro nao deve
-	   emendar no PDF de outro formato. */
+	/* Tracks in page order, with the format they belong to. Automatic
+	   advance only moves within the same format: an audiobook must not
+	   run on into the PDF of another format. */
 	var playlist = [];
 	cfg.formats.forEach(function (format) {
 		format.tracks.forEach(function (track) {
@@ -49,7 +49,7 @@
 	});
 
 	/* ------------------------------------------------------------------ *
-	 * Posicao guardada no navegador do ouvinte
+	 * Position stored in the listener's browser
 	 * ------------------------------------------------------------------ */
 
 	function positionKey(track) {
@@ -67,7 +67,7 @@
 				window.localStorage.removeItem(positionKey(track));
 			}
 		} catch (e) {
-			/* modo privado ou armazenamento bloqueado: seguir sem lembrar */
+			/* private mode or storage blocked: carry on without remembering */
 		}
 	}
 
@@ -86,12 +86,12 @@
 		try {
 			window.localStorage.removeItem(positionKey(track));
 		} catch (e) {
-			/* nada a fazer */
+			/* nothing to do */
 		}
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Utilidades
+	 * Utilities
 	 * ------------------------------------------------------------------ */
 
 	function pathOf(url) {
@@ -128,7 +128,7 @@
 		return node;
 	}
 
-	/* Icones em SVG inline: nada de fonte de icone nem CDN. */
+	/* Inline SVG icons: no icon font and no CDN. */
 	function icon(name) {
 		var paths = {
 			play: 'M8 5v14l11-7z',
@@ -148,7 +148,7 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Estado
+	 * State
 	 * ------------------------------------------------------------------ */
 
 	var audio = new Audio();
@@ -159,18 +159,18 @@
 		speed = 1;
 	}
 
-	var current = -1;   // indice em playlist
-	var bar = null;     // barra do player, criada sob demanda
-	var ui = {};        // referencias dos controles da barra
-	var rowButtons = [];// botao de cada faixa, no mesmo indice de playlist
+	var current = -1;   // index into playlist
+	var bar = null;     // player bar, created on demand
+	var ui = {};        // references to the bar controls
+	var rowButtons = [];// button for each track, at the same index as in playlist
 	var seeking = false;
 
 	/* ------------------------------------------------------------------ *
-	 * Botao em cada linha de arquivo
+	 * Button on each file row
 	 * ------------------------------------------------------------------ */
 
-	/* Mapa caminho -> indice, para casar a faixa com o link ja renderizado
-	   pelo core sem depender de protocolo ou dominio. */
+	/* Path -> index map, to match each track to the link already rendered
+	   by the core without depending on protocol or domain. */
 	var byPath = {};
 	playlist.forEach(function (track, index) {
 		byPath[pathOf(track.viewUrl)] = index;
@@ -194,16 +194,16 @@
 			toggle(index);
 		});
 
-		/* O tema posiciona o link de download em absolute, no canto esquerdo
-		   da linha, e deixa o nome do arquivo no fluxo normal. O botao entra
-		   no inicio do nome: fica imediatamente ao lado do icone de download
-		   sem que seja preciso sobrescrever o layout do tema. */
+		/* The theme positions the download link absolutely at the left edge
+		   of the row and leaves the file name in normal flow. The button is
+		   inserted at the start of the name, so it sits right next to the
+		   download icon without overriding the theme layout. */
 		var item = link.closest('li') || link.parentNode;
 		var nameNode = item ? item.querySelector('.name') : null;
 		if (nameNode) {
-			/* Container proprio dentro do .name: alinhar botao e texto com um
-			   seletor do plugin evita disputa de especificidade com o tema,
-			   que estiliza .name com seletores bem mais especificos. */
+			/* Dedicated container inside .name: aligning button and text with a
+			   plugin selector avoids a specificity fight with the theme, which
+			   styles .name with much more specific selectors. */
 			var wrap = el('span', 'ojsbrAudioNameWrap');
 			var text = el('span', 'ojsbrAudioNameText');
 			while (nameNode.firstChild) {
@@ -213,7 +213,7 @@
 			wrap.appendChild(text);
 			nameNode.appendChild(wrap);
 		} else {
-			/* Formato de arquivo unico: o link nao vem acompanhado de .name */
+			/* Single-file format: the link has no accompanying .name */
 			var anchor = link.closest('.link') || link;
 			if (!anchor.parentNode) {
 				return;
@@ -228,13 +228,13 @@
 		}
 	});
 
-	/* Nenhuma linha casou: sem botoes, nao ha player. */
+	/* No row matched: no buttons, so no player. */
 	if (!rowButtons.filter(Boolean).length) {
 		return;
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Barra do player
+	 * Player bar
 	 * ------------------------------------------------------------------ */
 
 	function buildBar() {
@@ -278,7 +278,7 @@
 			step: '1',
 			'aria-label': t.seek
 		});
-		/* Enquanto arrasta, a barra nao e sobrescrita pelo timeupdate. */
+		/* While dragging, the slider is not overwritten by timeupdate. */
 		ui.seek.addEventListener('input', function () {
 			seeking = true;
 			if (isFinite(audio.duration)) {
@@ -353,7 +353,7 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Reproducao
+	 * Playback
 	 * ------------------------------------------------------------------ */
 
 	function play(index) {
@@ -361,7 +361,7 @@
 			return;
 		}
 
-		/* Sai da faixa atual guardando onde parou. */
+		/* Leave the current track, saving where it stopped. */
 		if (current >= 0 && current !== index) {
 			savePosition(playlist[current], audio.currentTime);
 		}
@@ -377,7 +377,7 @@
 			audio.src = track.streamUrl;
 			var resume = loadPosition(track);
 			if (resume > 0) {
-				/* currentTime so pode ser ajustado com os metadados lidos. */
+				/* currentTime can only be set once metadata has loaded. */
 				audio.addEventListener('loadedmetadata', function once() {
 					audio.removeEventListener('loadedmetadata', once);
 					if (resume < audio.duration - 10) {
@@ -411,7 +411,7 @@
 		play(index);
 	}
 
-	/* Anterior/proxima dentro do mesmo formato de publicacao. */
+	/* Previous/next within the same publication format. */
 	function neighbour(direction) {
 		if (current < 0) {
 			return -1;
@@ -440,7 +440,7 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Atualizacao da interface
+	 * Interface updates
 	 * ------------------------------------------------------------------ */
 
 	function refreshRows() {
@@ -490,7 +490,7 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Eventos do elemento de audio
+	 * Audio element events
 	 * ------------------------------------------------------------------ */
 
 	var lastSaved = 0;
@@ -502,7 +502,7 @@
 
 	audio.addEventListener('timeupdate', function () {
 		refreshBar();
-		/* Grava a posicao a cada 5 s, nao a cada quadro. */
+		/* Save the position every 5 s, not on every frame. */
 		if (current >= 0 && Math.abs(audio.currentTime - lastSaved) > 5) {
 			lastSaved = audio.currentTime;
 			savePosition(playlist[current], audio.currentTime);
@@ -513,10 +513,11 @@
 		var finished = current;
 		var next = cfg.autoplayNext ? neighbour(1) : -1;
 
-		/* current e zerado antes de trocar de faixa porque play() guarda a
-		   posicao da faixa que estava tocando. Sem isto, a faixa que acabou
-		   de terminar seria regravada com a duracao inteira logo apos ter
-		   sido limpa aqui, e voltaria a aparecer como "parou no fim". */
+		/* current is reset before switching tracks because play() saves the
+		   position of the track that was playing. Without this, the track
+		   that just ended would be saved again at its full duration right
+		   after being cleared here, and would show up as "stopped at the
+		   end" again. */
 		current = -1;
 		lastSaved = 0;
 		if (finished >= 0) {

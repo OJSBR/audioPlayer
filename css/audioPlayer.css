@@ -1,15 +1,15 @@
 /**
- * plugins/generic/audioPlayer/css/audioPlayer.css
+ * @file plugins/generic/audioPlayer/css/audioPlayer.css
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * Estilos do player de audiolivro. Prefixo ojsbrAudio para nao colidir
- * com o tema da editora.
+ * Audiobook player styles. Uses the ojsbrAudio prefix to avoid clashing
+ * with the press theme.
  */
 
 /* ---------------------------------------------------------------- *
- * Botao ao lado do link de download
+ * Button next to the download link
  * ---------------------------------------------------------------- */
 
 .ojsbrAudioRowButton {
@@ -54,10 +54,10 @@
 	color: #fff;
 }
 
-/* O layout da linha e do tema: o link de download vem posicionado em
-   absolute e o nome do arquivo fica no fluxo. So o proprio .name vira um
-   flex container, para o botao ficar ao lado do texto e nomes longos
-   quebrarem alinhados, em vez de empurrar o botao para outra linha. */
+/* The row layout belongs to the theme: the download link is absolutely
+   positioned and the file name stays in flow. Only .name itself becomes a
+   flex container, so the button stays next to the text and long names
+   wrap aligned instead of pushing the button onto another line. */
 .ojsbrAudioNameWrap {
 	display: flex;
 	align-items: center;
@@ -67,8 +67,8 @@
 	flex: 0 0 auto;
 }
 
-/* Nomes de arquivo nao tem espaco onde quebrar. Sem isto, um nome longo
-   numa coluna estreita empurraria o botao para a linha de baixo. */
+/* File names have no spaces to break at. Without this, a long name in a
+   narrow column would push the button down to the next line. */
 .ojsbrAudioNameText {
 	min-width: 0;
 	overflow-wrap: anywhere;
@@ -76,10 +76,10 @@
 }
 
 /* ---------------------------------------------------------------- *
- * Barra do player
+ * Player bar
  * ---------------------------------------------------------------- */
 
-/* Espaco no fim da pagina para a barra nao cobrir o rodape. */
+/* Space at the bottom of the page so the bar does not cover the footer. */
 body.ojsbrAudioBarOpen {
 	padding-bottom: 6rem;
 }
@@ -225,7 +225,7 @@ body.ojsbrAudioBarOpen {
 }
 
 /* ---------------------------------------------------------------- *
- * Telas estreitas
+ * Narrow screens
  * ---------------------------------------------------------------- */
 
 @media (max-width: 640px) {

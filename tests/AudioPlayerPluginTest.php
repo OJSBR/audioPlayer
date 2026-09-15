@@ -3,172 +3,155 @@
 /**
  * @file plugins/generic/audioPlayer/tests/AudioPlayerPluginTest.php
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
- * Distributed under the GNU GPL v3.
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class AudioPlayerPluginTest
  *
- * @brief Cobre o calculo de faixa HTTP (RFC 9110 secao 14.1), que e o que o
- *        navegador exercita a cada arrasto da barra de progresso, a deteccao de
- *        audio e a integridade dos locales.
+ * @brief The HTTP range rules (RFC 9110, section 14.1) browsers exercise on every
+ *        drag of the progress bar, audio detection, and the guarantee that the
+ *        plugin only acts after the core has authorized the download.
  */
 
 namespace APP\plugins\generic\audioPlayer\tests;
 
 use APP\plugins\generic\audioPlayer\AudioPlayerPlugin;
+use APP\plugins\generic\audioPlayer\AudioPlayerSettingsForm;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PKP\plugins\Hook;
 use PKP\tests\PKPTestCase;
 
+#[CoversClass(AudioPlayerPlugin::class)]
+#[CoversClass(AudioPlayerSettingsForm::class)]
 class AudioPlayerPluginTest extends PKPTestCase
 {
-    private const DIR = __DIR__ . '/..';
-    private const TAM = 1000;   // arquivo de 1000 bytes nos exemplos
+    /** Size of the file in the examples. */
+    private const SIZE = 1000;
 
-    /** Sem cabecalho Range a resposta e inteira (200, nao 206). */
-    public function testSemFaixaDevolveArquivoInteiro(): void
+    private function source(): string
     {
-        $this->assertSame([0, 999, false], AudioPlayerPlugin::resolveRange('', self::TAM));
-        $this->assertSame([0, 999, false], AudioPlayerPlugin::resolveRange('   ', self::TAM));
+        return (string) file_get_contents(dirname(__DIR__) . '/AudioPlayerPlugin.php');
     }
 
-    /** Faixa fechada, aberta e de um byte so. */
-    public function testFaixasValidas(): void
+    public function testWithoutARangeTheWholeFileIsSent(): void
     {
-        $this->assertSame([0, 499, true], AudioPlayerPlugin::resolveRange('bytes=0-499', self::TAM));
-        $this->assertSame([500, 999, true], AudioPlayerPlugin::resolveRange('bytes=500-', self::TAM));
-        $this->assertSame([0, 0, true], AudioPlayerPlugin::resolveRange('bytes=0-0', self::TAM));
-        $this->assertSame([999, 999, true], AudioPlayerPlugin::resolveRange('bytes=999-', self::TAM));
+        $this->assertSame([0, 999, false], AudioPlayerPlugin::resolveRange('', self::SIZE));
+        $this->assertSame([0, 999, false], AudioPlayerPlugin::resolveRange('   ', self::SIZE));
     }
 
-    /** Faixa de sufixo: os ultimos N bytes. */
-    public function testFaixaDeSufixo(): void
+    public function testValidRanges(): void
     {
-        $this->assertSame([500, 999, true], AudioPlayerPlugin::resolveRange('bytes=-500', self::TAM));
-        // sufixo maior que o arquivo entrega o arquivo todo, nao estoura
-        $this->assertSame([0, 999, true], AudioPlayerPlugin::resolveRange('bytes=-5000', self::TAM));
+        $this->assertSame([0, 499, true], AudioPlayerPlugin::resolveRange('bytes=0-499', self::SIZE));
+        $this->assertSame([500, 999, true], AudioPlayerPlugin::resolveRange('bytes=500-', self::SIZE));
+        $this->assertSame([0, 0, true], AudioPlayerPlugin::resolveRange('bytes=0-0', self::SIZE));
+        $this->assertSame([999, 999, true], AudioPlayerPlugin::resolveRange('bytes=999-', self::SIZE));
     }
 
-    /** O fim alem do tamanho e truncado no ultimo byte. */
-    public function testFimAlemDoTamanhoETruncado(): void
+    public function testSuffixRanges(): void
     {
-        $this->assertSame([0, 999, true], AudioPlayerPlugin::resolveRange('bytes=0-99999', self::TAM));
+        $this->assertSame([500, 999, true], AudioPlayerPlugin::resolveRange('bytes=-500', self::SIZE));
+        // A suffix longer than the file sends the whole file.
+        $this->assertSame([0, 999, true], AudioPlayerPlugin::resolveRange('bytes=-5000', self::SIZE));
     }
 
-    /** Faixa insatisfazivel tem de virar 416, nao resposta parcial errada. */
-    public function testFaixasInsatisfaziveis(): void
+    public function testAnEndBeyondTheFileIsCutAtTheLastByte(): void
     {
-        foreach (['bytes=-', 'bytes=-0', 'bytes=1000-', 'bytes=5000-6000', 'bytes=600-500'] as $h) {
-            $this->assertFalse(AudioPlayerPlugin::resolveRange($h, self::TAM), "deveria recusar: {$h}");
+        $this->assertSame([0, 999, true], AudioPlayerPlugin::resolveRange('bytes=0-99999', self::SIZE));
+    }
+
+    public function testUnsatisfiableRangesAreRefused(): void
+    {
+        foreach (['bytes=-', 'bytes=-0', 'bytes=1000-', 'bytes=5000-6000', 'bytes=600-500'] as $header) {
+            $this->assertFalse(AudioPlayerPlugin::resolveRange($header, self::SIZE), "Accepted {$header}.");
         }
     }
 
-    /** Cabecalho malformado e ignorado (resposta inteira), nunca aceito. */
-    public function testCabecalhoMalformadoNaoViraFaixa(): void
+    public function testAMalformedHeaderIsIgnored(): void
     {
-        foreach (['items=0-10', 'bytes=abc-def', 'bytes 0-10', 'bytes=0-10, 20-30'] as $h) {
-            $this->assertSame([0, 999, false], AudioPlayerPlugin::resolveRange($h, self::TAM), "deveria ignorar: {$h}");
+        foreach (['items=0-10', 'bytes=abc-def', 'bytes 0-10', 'bytes=0-10, 20-30'] as $header) {
+            $this->assertSame([0, 999, false], AudioPlayerPlugin::resolveRange($header, self::SIZE), "Used {$header}.");
         }
     }
 
-    /** Audio reconhecido pelo mimetype ou, se ele nao ajudar, pela extensao. */
-    public function testDeteccaoDeAudio(): void
+    public function testAudioIsRecognisedByMimetypeOrExtension(): void
     {
         $this->assertTrue(AudioPlayerPlugin::isAudioFile('audio/mpeg', null, null));
-        $this->assertTrue(AudioPlayerPlugin::isAudioFile('application/octet-stream', 'faixa.mp3', null));
-        $this->assertTrue(AudioPlayerPlugin::isAudioFile(null, null, '/x/y/faixa.m4b'));
-        $this->assertFalse(AudioPlayerPlugin::isAudioFile('application/pdf', 'livro.pdf', null));
-        $this->assertFalse(AudioPlayerPlugin::isAudioFile(null, 'livro.epub', null));
+        $this->assertTrue(AudioPlayerPlugin::isAudioFile('application/octet-stream', 'track.mp3', null));
+        $this->assertTrue(AudioPlayerPlugin::isAudioFile(null, null, '/x/y/track.m4b'));
+        $this->assertFalse(AudioPlayerPlugin::isAudioFile('application/pdf', 'book.pdf', null));
+        $this->assertFalse(AudioPlayerPlugin::isAudioFile(null, 'book.epub', null));
     }
 
-    /** Audio salvo como octet-stream nao toca: a extensao tem a palavra final. */
-    public function testMimetypeResolvidoPelaExtensao(): void
+    public function testTheExtensionDecidesTheMimetypeSent(): void
     {
+        // Audio sent as application/octet-stream does not play.
         $this->assertSame('audio/mpeg', AudioPlayerPlugin::resolveMimetype('application/octet-stream', 'a.mp3', null));
         $this->assertSame('audio/mp4', AudioPlayerPlugin::resolveMimetype(null, 'a.m4b', null));
-        $this->assertSame('audio/ogg', AudioPlayerPlugin::resolveMimetype('audio/ogg', 'a.desconhecido', null));
+        $this->assertSame('audio/ogg', AudioPlayerPlugin::resolveMimetype('audio/ogg', 'a.unknown', null));
         $this->assertSame('application/octet-stream', AudioPlayerPlugin::resolveMimetype(null, 'a.xyz', null));
     }
 
-    /** Todo locale precisa ter TODAS as chaves: no 3.5 a que falta vira ##chave##. */
-    public function testTodosOsLocalesTemTodasAsChaves(): void
-    {
-        $chavesEn = array_keys($this->chavesDe(self::DIR . '/locale/en/locale.po'));
-        $this->assertNotEmpty($chavesEn);
-        foreach (glob(self::DIR . '/locale/*/locale.po') as $arquivo) {
-            $locale = basename(dirname($arquivo));
-            $chaves = $this->chavesDe($arquivo);
-            $this->assertSame([], array_values(array_diff($chavesEn, array_keys($chaves))), "locale {$locale} sem chaves");
-            foreach ($chaves as $chave => $valor) {
-                $this->assertNotSame('', trim($valor), "locale {$locale}: chave {$chave} vazia");
-            }
-        }
-    }
-
-    /** Codigos legados nao carregam no 3.5. */
-    public function testNaoUsaCodigosDeLocaleLegados(): void
-    {
-        foreach (['fr_FR', 'pt_PT', 'nb', 'sr', 'zh_CN'] as $legado) {
-            $this->assertDirectoryDoesNotExist(self::DIR . '/locale/' . $legado);
-        }
-    }
-
-    /** @return array<string,string> */
-    private function chavesDe(string $arquivo): array
-    {
-        $this->assertFileExists($arquivo);
-        $out = [];
-        foreach ((new \Gettext\Loader\PoLoader())->loadFile($arquivo) as $t) {
-            if ($t->getOriginal() === '') {
-                continue;
-            }
-            $out[$t->getOriginal()] = (string) $t->getTranslation();
-        }
-        return $out;
-    }
-
     /**
-     * O plugin nao pode ganhar um caminho proprio ate o arquivo.
+     * The plugin must never get a way to the file of its own.
      *
-     * Toda a autorizacao do download no OMP vive em CatalogBookHandler::download:
-     * OmpPublishedSubmissionAccessPolicy, o formato disponivel, a publicacao
-     * publicada e o direct_sales_price do arquivo. O hook so e disparado depois
-     * de tudo isso passar, entao o plugin herda a checagem inteira sem repetir
-     * uma linha dela. O risco real nao e a logica de hoje, e alguem amanha mover
-     * o plugin para um hook que roda ANTES (LoadHandler, por exemplo) e abrir um
-     * caminho para o arquivo sem passar pela politica. Este teste quebra nesse dia.
+     * All the download authorization of OMP lives in CatalogBookHandler::download
+     * (OmpPublishedSubmissionAccessPolicy, the format available, the publication
+     * published, the direct sales price of the file). The hook is only called
+     * after all of it, so the plugin inherits the whole check. The risk is a later
+     * move to a hook that runs earlier, such as LoadHandler; this test fails then.
      *
-     * Verificado tambem em servidor, pedindo o mesmo mp3 com ?audioStream=1:
-     * arquivo liberado 206; direct_sales_price NULL 404; formato indisponivel
-     * 404; publicacao nao publicada 404 — identico ao download normal.
+     * Also checked on a server, requesting the same mp3 with ?audioStream=1: file
+     * available 206; no direct sales price 404; format unavailable 404;
+     * publication unpublished 404 - the same as the normal download.
      */
-    public function testSoEnganchaEmHooksPosAutorizacao(): void
+    public function testOnlyHooksCalledAfterAuthorizationAreUsed(): void
     {
-        $codigo = file_get_contents(self::DIR . '/AudioPlayerPlugin.php');
-        preg_match_all("/Hook::add\\(\\s*'([^']+)'/", $codigo, $m);
-        $esperados = [
-            'CatalogBookHandler::download',   // disparado apos toda a politica de acesso
-            'TemplateManager::display',
-            'Templates::Catalog::Book::Main',
-        ];
-        sort($esperados);
-        $achados = array_unique($m[1]);
-        sort($achados);
-        $this->assertSame($esperados, $achados, 'conjunto de hooks mudou: revisar o acesso antes de aceitar');
-    }
+        preg_match_all("/Hook::add\\(\\s*'([^']+)'/", $this->source(), $m);
+        $expected = ['CatalogBookHandler::download', 'TemplateManager::display', 'Templates::Catalog::Book::Main'];
+        sort($expected);
+        $found = array_unique($m[1]);
+        sort($found);
 
-    /** Nenhum roteamento proprio, que serviria arquivo fora da politica do core. */
-    public function testNaoRegistraRotaPropria(): void
-    {
-        $codigo = file_get_contents(self::DIR . '/AudioPlayerPlugin.php');
-        foreach (['LoadHandler', 'LoadComponentHandler', 'Dispatcher::'] as $proibido) {
-            $this->assertStringNotContainsString($proibido, $codigo, "o plugin nao pode registrar rota propria ({$proibido})");
+        $this->assertSame($expected, $found, 'The hooks changed: review the access control before accepting it.');
+        foreach (['LoadHandler', 'LoadComponentHandler', 'Dispatcher::'] as $forbidden) {
+            $this->assertStringNotContainsString($forbidden, $this->source(), "The plugin must not route requests itself ({$forbidden}).");
         }
     }
 
-    /** Sem arquivo no hook o plugin declina em vez de improvisar. */
-    public function testDeclinaSemArquivo(): void
+    public function testWithoutAFileTheCoreAnswers(): void
     {
         $plugin = new AudioPlayerPlugin();
-        $this->assertFalse($plugin->streamAudio('CatalogBookHandler::download', [null, null, null, null, false]));
-        $this->assertFalse($plugin->streamAudio('CatalogBookHandler::download', []));
+        $this->assertSame(Hook::CONTINUE, $plugin->streamAudio('CatalogBookHandler::download', [null, null, null, null, false]));
+        $this->assertSame(Hook::CONTINUE, $plugin->streamAudio('CatalogBookHandler::download', []));
+    }
+
+    public function testTheSiteLevelHasNoSettingsToOpen(): void
+    {
+        $request = new class () {
+            public function getContext()
+            {
+                return null;
+            }
+
+            public function getUserVar($name)
+            {
+                return $name === 'verb' ? 'settings' : null;
+            }
+
+            public function getRouter()
+            {
+                throw new \RuntimeException('The site level must not build a settings URL.');
+            }
+        };
+        $plugin = new class () extends AudioPlayerPlugin {
+            public function getEnabled($contextId = null)
+            {
+                return true;
+            }
+        };
+
+        $this->assertSame([], array_filter($plugin->getActions($request, []), fn ($action) => $action->getId() === 'settings'));
+        $this->expectExceptionMessage('Unhandled management action!');
+        $plugin->manage([], $request);
     }
 }

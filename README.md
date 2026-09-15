@@ -1,10 +1,10 @@
 # audioPlayer — OMP plugin
 
 [![OMP](https://img.shields.io/badge/OMP-3.5-brightgreen)](https://pkp.sfu.ca/omp/)
-[![Version](https://img.shields.io/badge/version-1.0.1.1-blue)](version.xml)
+[![Version](https://img.shields.io/badge/version-1.0.2.0-blue)](version.xml)
 [![License](https://img.shields.io/badge/license-GPL--3.0-lightgrey)](LICENSE)
 
-**⬇️ Install package:** [OMP 3.5](https://github.com/OJSBR/audioPlayerOmp/releases/download/1.0.1.1-omp3.5/audioPlayer-1.0.1.1-omp3.5.tar.gz) — or browse all [Releases](../../releases).
+**⬇️ Install package:** [OMP 3.5](https://github.com/OJSBR/audioPlayer/releases/download/1.0.2.0-omp3.5/audioPlayer-1.0.2.0-omp3.5.tar.gz) — or browse all [Releases](../../releases).
 
 **▶️ Live demo:** [Editora UEMG — audiobook with 26 tracks](https://ebooks.editora.uemg.br/editora/pt_BR/catalog/book/5)
 
@@ -13,14 +13,14 @@ next to every audio file on the book page, plus a player bar with in-track seeki
 previous/next track, adjustable speed, continuous playback and resume from where the
 listener stopped. The original download button is left untouched.
 
-> **Developed and maintained by [OJSBR](https://ojsbr.com.br).** See the
+> **Developed and maintained by [OJSBR](https://ojsbr.com).** See the
 > [Credits & authorship](#credits--authorship) section below.
 
 ## Compatibility & branches
 
 | Application | Version | Branch | Plugin release |
 |-------------|---------|--------|----------------|
-| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(default)* | 1.0.1.1 |
+| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(default)* | 1.0.2.0 |
 
 ## What it does
 
@@ -83,43 +83,46 @@ Range support is complete: `206 Partial Content`, suffix ranges (`bytes=-500`) a
 
 ## Tests
 
-PHPUnit, in the PKP `ApplicationPlugins` suite:
+- **PHPUnit** (`tests/*Test.php`, on `PKP\tests\PKPTestCase`, 26 tests): the HTTP Range rules of
+  RFC 9110 §14.1 (closed, open, single-byte, suffix, suffix larger than the file, end past the
+  file, and five unsatisfiable forms that must become `416`), audio detection by mimetype and by
+  extension, the mimetype sent when the stored one is generic, access control (the set of hooks
+  is asserted exactly, all of them called after `CatalogBookHandler::download` has run OMP's
+  access policy, and no route of its own), the site level without settings, the plugin classes
+  against the installed PKP, the 38 translations and the template. From the installation root:
 
-```bash
-cd lib/pkp/tests
-php ../lib/vendor/bin/phpunit --no-coverage -c phpunit.xml \
-  /absolute/path/to/plugins/generic/audioPlayer/tests
-```
+  ```bash
+  lib/pkp/lib/vendor/bin/phpunit --configuration lib/pkp/tests/phpunit.xml --no-coverage "$PWD/plugins/generic/audioPlayer/tests"
+  ```
 
-13 tests / 686 assertions covering the HTTP Range computation against RFC 9110 §14.1
-(closed, open, single-byte, suffix, suffix larger than the file, end past the file, and
-five unsatisfiable forms that must become `416`), audio detection by mimetype and by
-extension, mimetype resolution when the stored type is generic, locale integrity — every
-locale carrying every key with no empty value, and no legacy locale codes, since in 3.5 a
-missing key renders as `##key##` instead of falling back to English — and access control:
-the set of hooks the plugin registers is asserted exactly, all of them firing after
-`CatalogBookHandler::download` has already run the OMP access policy, and the plugin
-registers no route of its own.
+- **Cypress** (`cypress/tests/functional/AudioPlayer.cy.js`, run by
+  [pkp-github-actions](https://github.com/pkp/pkp-github-actions) on OMP on every push): enables
+  the plugin and saves its settings, reopening the form to prove they persisted and putting them
+  back. With `audioBookPage` (the path of a book page with an audio format) it also builds the
+  player, checks that a `Range` request answers `206` with a correct `Content-Range` (it fails
+  with the hook off) and an unsatisfiable one `416`, and that a file outside the format is refused
+  with the same status with and without `?audioStream=1`.
 
-Cypress, from the installation root:
+  ```bash
+  npx cypress run --config specPattern='plugins/generic/audioPlayer/cypress/tests/functional/*.cy.js' \
+    --env contextPath=<press>,adminUser=<user>,adminPassword=<password>,audioBookPage=index.php/<press>/catalog/book/14
+  ```
 
-```bash
-npx cypress run \
-  --config specPattern='plugins/generic/audioPlayer/cypress/tests/functional/*.cy.js' \
-  --env contextPath=mypress,adminUsername=admin,adminPassword=secret
-```
+- Verified on OMP 3.5.0.3 with a published audiobook.
 
-4 specs: enabling the plugin and saving its settings (reopening the form to prove the
-values persisted), building the player from the audio publication format, a `Range`
-request that must answer `206` with a correct `Content-Range` and an unsatisfiable one
-that must answer `416`, and a file that does not belong to the format, which must be
-refused with exactly the same status with and without `?audioStream=1`.
+Tests are kept in the repository and are not part of the release package.
 
 ## Credits & authorship
 
-- **OJSBR** — https://ojsbr.com.br — plugin design, implementation and maintenance.
+- **OJSBR** — https://ojsbr.com — plugin design, implementation and maintenance.
 - **Public Knowledge Project (PKP)** — Open Monograph Press and the plugin API this
   builds on.
+
+## AI use
+
+Generative AI (Claude, by Anthropic) was used to write and run tests, improve the code and bring
+it in line with PKP standards. Every change is reviewed and tested by OJSBR, which is responsible
+for the published releases.
 
 ## Contributing
 
@@ -146,7 +149,7 @@ parou. O botão de download original **não é alterado**.
 
 | Aplicação | Versão | Branch | Release do plugin |
 |-----------|--------|--------|-------------------|
-| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(padrão)* | 1.0.1.1 |
+| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(padrão)* | 1.0.2.0 |
 
 ### O que faz
 
@@ -196,36 +199,28 @@ de acesso da editora). **Nenhuma dessas regras é reimplementada.**
 
 ### Testes
 
-PHPUnit, na suíte `ApplicationPlugins` da PKP:
+PHPUnit em `tests/` (sobre `PKP\tests\PKPTestCase`, 26 testes) e Cypress em
+`cypress/tests/functional/` (rodado pelo [pkp-github-actions](https://github.com/pkp/pkp-github-actions)
+no OMP a cada push), com os comandos da seção em inglês. A suíte cobre as regras de HTTP Range
+(RFC 9110 §14.1, incluindo as formas que viram `416`), a detecção de áudio, o mimetype enviado, o
+controle de acesso (o conjunto de hooks é conferido exatamente e nenhum roda antes da política de
+acesso do OMP), o nível do site sem configurações, as 38 traduções e o template. Com `audioBookPage`,
+o Cypress monta o player e confere a resposta `206` a um pedido `Range`.
 
-```bash
-cd lib/pkp/tests
-php ../lib/vendor/bin/phpunit --no-coverage -c phpunit.xml \
-  /caminho/absoluto/plugins/generic/audioPlayer/tests
-```
+Verificado no OMP 3.5.0.3 com um audiolivro publicado.
 
-13 testes / 686 asserções cobrindo o cálculo de faixa HTTP conforme a RFC 9110 §14.1,
-a detecção de áudio, a resolução do mimetype, a integridade dos 38 locales e o controle
-de acesso: o conjunto de hooks é conferido exatamente, todos disparando depois de o
-`CatalogBookHandler::download` já ter rodado a política de acesso do OMP.
-
-Cypress, a partir da raiz da instalação:
-
-```bash
-npx cypress run \
-  --config specPattern='plugins/generic/audioPlayer/cypress/tests/functional/*.cy.js' \
-  --env contextPath=minhaeditora,adminUsername=admin,adminPassword=senha
-```
-
-4 specs: ligar o plugin e salvar as configurações (reabrindo o formulário para provar que
-persistiu), montar o player a partir do formato de áudio, um `Range` que precisa responder
-`206` e um impossível que precisa responder `416`, e um arquivo que não pertence ao formato,
-que precisa ser recusado com o mesmo status com e sem `?audioStream=1`.
+Os testes ficam no repositório e não fazem parte do pacote da release.
 
 ### Créditos e autoria
 
-- **OJSBR** — https://ojsbr.com.br — concepção, implementação e manutenção.
+- **OJSBR** — https://ojsbr.com — concepção, implementação e manutenção.
 - **Public Knowledge Project (PKP)** — o Open Monograph Press e a API de plugins.
+
+### Uso de IA
+
+Foi usada IA generativa (Claude, da Anthropic) para escrever e rodar testes, melhorar o código e
+alinhá-lo aos padrões da PKP. Toda mudança é revisada e testada pela OJSBR, que responde pelas
+releases publicadas.
 
 ### Licença
 

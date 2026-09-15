@@ -1,170 +1,203 @@
 /**
  * @file cypress/tests/functional/AudioPlayer.cy.js
  *
- * Copyright (c) 2026 OJSBR (https://ojsbr.com.br)
- * Distributed under the GNU GPL v3.
+ * Copyright (c) 2026 OJSBR (https://ojsbr.com)
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * Roda contra o conjunto de dados de teste da PKP por padrao. Para apontar para
- * outra instalacao, passe as variaveis:
- *   npx cypress run --spec 'plugins/generic/audioPlayer/cypress/tests/functional/*.cy.js' \
- *     --env contextPath=minhaeditora,adminUsername=admin,adminPassword=senha
+ * Functional tests on OMP.
+ *
+ * Parameters (--env): contextPath, adminUser, adminPassword (captcha on login
+ * must be off for the run). The defaults match the data set of PKP's
+ * continuous integration, and the first test enables the plugin when it is off.
+ * Every setting touched is put back as it was.
+ *
+ * The player tests also need audioBookPage: the path, from the site root, of a
+ * book page with an audio publication format (for example
+ * index.php/press/catalog/book/14). They are skipped without it: the data set of
+ * PKP's continuous integration has no audio.
  */
 
-describe('audioPlayer plugin tests', function () {
-	const contexto = Cypress.env('contextPath') || 'publicknowledge';
-	const usuario = Cypress.env('adminUsername') || 'admin';
-	const senha = Cypress.env('adminPassword') || 'admin';
-	const LIMITE = 10;   // quantos livros do catalogo abrir procurando audio
+describe('Audio Player plugin', function() {
+	const contextPath = Cypress.env('contextPath') || 'publicknowledge';
+	const adminUser = Cypress.env('adminUser') || 'admin';
+	const adminPassword = Cypress.env('adminPassword') || 'admin';
+	const audioBookPage = Cypress.env('audioBookPage');
 
-	it('Enables the plugin and saves its settings', function () {
-		cy.login(usuario, senha, contexto);
+	const rowName = 'audioplayerplugin';
+	const settingsForm = 'form[id="audioPlayerSettings"]';
 
-		abrirGradeDePlugins();
+	// ---- OJSBR spec helpers (padrão v2): work on OJS/OMP 3.3, 3.4 and 3.5 and in PKP's CI ----
 
-		// Idempotente de proposito: rodar a suite duas vezes nao pode DESLIGAR o
-		// plugin que a primeira execucao ligou.
-		cy.get('input[id^="select-cell-audioplayerplugin-enabled"]').as('ligar');
-		cy.get('@ligar').then(($el) => {
-			if (!$el.is(':checked')) {
-				cy.get('@ligar').click();
-				cy.get('div:contains(\'The plugin "Audio Player" has been enabled.\')');
-				cy.waitJQuery();
+	const pageUrl = (path) => '/index.php/' + contextPath + (path ? '/' + path : '');
+
+	// Same as PKP's cy.waitJQuery(), which the support files of OJS 3.3 test sites may lack.
+	// The Plugins tab can keep requests open for a while (the plugin gallery), hence the timeout.
+	const waitJQuery = () => cy.window().its('jQuery.active', {timeout: 60000}).should('eq', 0);
+
+	// Requests carry the browser's User-Agent: OJS 3.3 drops a session whose agent changes.
+	const request = (options) => cy.window({log: false}).then((win) => cy.request(Object.assign(
+		typeof options === 'string' ? {url: options} : options,
+		{headers: Object.assign({'User-Agent': win.navigator.userAgent}, (typeof options === 'string' ? {} : options.headers) || {})}
+	)));
+
+	// Signs in through requests (the login page can re-render while it is typed into), then
+	// falls back to the form when the session did not stick (OJS 3.3 cookie handling).
+	const login = (username, password) => {
+		cy.clearCookies();
+		request(pageUrl('login')).then((response) => {
+			const token = /name="csrfToken" value="([^"]+)"/.exec(response.body)[1];
+			// The form posts to the URL with the language: a redirect would turn the POST into a GET.
+			const action = /<form[^>]*id="login"[^>]*action="([^"]+)"/.exec(response.body)[1];
+			request({method: 'POST', url: action, form: true, body: {csrfToken: token, username: username, password: password}, log: false});
+		});
+		cy.visit(pageUrl('submissions') + '?reload=' + Date.now());
+		cy.get('body').then(($body) => {
+			if ($body.find('form#login').length) {
+				cy.get('form#login input[name="username"]').type(username, {delay: 0});
+				cy.get('form#login input[name="password"]').type(password, {delay: 0, log: false});
+				cy.get('form#login').submit();
+				cy.get('form#login', {timeout: 30000}).should('not.exist');
 			}
 		});
-		cy.reload();
-		abrirGradeDePlugins();
-		cy.get('input[id^="select-cell-audioplayerplugin-enabled"]').should('be.checked');
+	};
 
-		abrirConfiguracoes();
-		cy.wait(2000); // Avoid occasional failure due to form init taking time
-		cy.get('form[id="audioPlayerSettings"] input[id^="autoplayNext"]').check();
-		cy.get('form[id="audioPlayerSettings"] select[id^="defaultSpeed"]').select('1.5');
-		cy.get('form[id="audioPlayerSettings"] button[id^="submitFormButton"]').click();
-		cy.waitJQuery();
-
-		// Reabrir e conferir: formulario que "salva" sem persistir e o defeito
-		// classico de plugin_settings gravado com serialize() em vez de updateSetting().
-		abrirConfiguracoes();
-		cy.wait(2000);
-		cy.get('form[id="audioPlayerSettings"] input[id^="autoplayNext"]').should('be.checked');
-		cy.get('form[id="audioPlayerSettings"] select[id^="defaultSpeed"]').should('have.value', '1.5');
-	});
-
-	it('Builds the player from the audio publication format', function () {
-		abrirLivroCom('.ojsbrAudioPlayerData', 'an audio publication format', () => {
-			// O servidor entrega so os dados; a barra e as faixas sao montadas em JS.
-			cy.get('.ojsbrAudioRow').should('have.length.at.least', 1);
-			cy.get('.ojsbrAudioRowButton').first().click();
-			// A barra e anexada ao body e a classe de estado vai no body tambem,
-			// porque ela empurra o rodape da pagina quando abre.
-			cy.get('.ojsbrAudioBar').should('exist');
-			cy.get('body').should('have.class', 'ojsbrAudioBarOpen');
-			cy.get('.ojsbrAudioTitle').should('not.have.text', '');
-		});
-	});
-
-	it('Answers a Range request with 206, which is what seeking depends on', function () {
-		abrirLivroCom('.ojsbrAudioPlayerData', 'an audio publication format', () => {
-			cy.get('.ojsbrAudioRowButton').first().should('exist');
-			cy.get('.ojsbrAudioPlayerData').invoke('attr', 'data-config').then((json) => {
-				const faixa = JSON.parse(json).formats[0].tracks[0];
-				expect(faixa.streamUrl, 'the track URL carries the streaming parameter').to.contain('audioStream');
-
-				// Um proxy que engole o cabecalho Range devolve 200 aqui, e todo
-				// arrasto na barra vira download do arquivo inteiro. Ja aconteceu.
-				cy.request({url: faixa.streamUrl, headers: {Range: 'bytes=0-99'}}).then((r) => {
-					expect(r.status).to.equal(206);
-					expect(r.headers['content-range']).to.match(/^bytes 0-99\/\d+$/);
-					expect(r.headers['accept-ranges']).to.equal('bytes');
+	// REST API calls made from the page itself, so they carry the browser's own session.
+	const api = (path, options = {}) => cy.window({log: false}).then((win) => cy.wrap(
+		win.fetch(path, Object.assign({credentials: 'same-origin'}, options)).then((response) => {
+			if (!response.ok) {
+				return response.text().then((text) => {
+					throw new Error(path + ' answered ' + response.status + ': ' + text.slice(0, 300));
 				});
+			}
+			return response.json();
+		}),
+		{log: false, timeout: 30000}
+	));
 
-				// Faixa impossivel: 416, nao 200 com o arquivo inteiro.
-				cy.request({url: faixa.streamUrl, headers: {Range: 'bytes=99999999999-'}, failOnStatusCode: false})
-					.its('status').should('equal', 416);
+	// The website settings page on its Plugins tab (a new query string forces a load). Load it
+	// once per test: loading it again while its plugin gallery request is pending stalls the
+	// web server of PKP's CI; API calls and settings modals work on the page already open.
+	const openPluginsTab = () => {
+		cy.visit(pageUrl('management/settings/website') + '?reload=' + Date.now() + '#plugins');
+		cy.get('button[id="plugins-button"]', {timeout: 60000}).click();
+		cy.get('button[id="plugins-button"]').should('have.attr', 'aria-selected', 'true');
+		waitJQuery();
+	};
+
+	// Enables the plugin in the grid when it is off (never turns it off).
+	const enablePlugin = (rowName) => {
+		cy.get('input[id^="select-cell-' + rowName + '-enabled"]', {timeout: 30000}).then(($checkbox) => {
+			if (!$checkbox.is(':checked')) {
+				cy.wrap($checkbox).click();
+				waitJQuery();
+			}
+		});
+		cy.get('input[id^="select-cell-' + rowName + '-enabled"]').should('be.checked');
+	};
+
+	// Opens the settings modal from the grid, without reloading the page: a reload right
+	// after saving can stall the web server of PKP's CI. The form is fetched each time.
+	const openPluginSettings = (rowName, formSelector) => {
+		cy.get('a[id*="-row-' + rowName + '-settings-button-"]', {timeout: 30000}).then(($link) => {
+			if (!$link.is(':visible')) {
+				cy.get('tr[id$="-row-' + rowName + '"] a.show_extras').first().click();
+			}
+		});
+		// The grid may still be animating the extras row: the link is clicked once it exists.
+		cy.get('a[id*="-row-' + rowName + '-settings-button-"]').first().click({force: true});
+		waitJQuery();
+		cy.window().should((win) => {
+			expect(win.jQuery(formSelector).data('pkp.handler')).to.exist;
+		});
+	};
+
+	// ---- end of helpers ----
+
+	const openSettings = () => openPluginSettings(rowName, settingsForm);
+
+	const save = () => {
+		cy.get(settingsForm + ' button[id^="submitFormButton-"]').click({force: true});
+		waitJQuery();
+		cy.get(settingsForm).should('not.exist');
+	};
+
+	// The first track of the page, from the data the plugin adds to it.
+	const firstTrack = () => cy.get('.ojsbrAudioPlayerData').invoke('attr', 'data-config').then((json) => JSON.parse(json).formats[0].tracks[0]);
+
+	it('Enables the plugin and saves its settings', function() {
+		login(adminUser, adminPassword);
+		openPluginsTab();
+		enablePlugin(rowName);
+		openSettings();
+
+		cy.get(settingsForm + ' input[name="autoplayNext"]').then(($autoplay) => {
+			cy.get(settingsForm + ' select[name="defaultSpeed"]').invoke('val').then((speed) => {
+				const autoplay = $autoplay.is(':checked');
+				const otherSpeed = speed === '1.5' ? '2' : '1.5';
+
+				cy.get(settingsForm + ' input[name="autoplayNext"]').click({force: true});
+				cy.get(settingsForm + ' select[name="defaultSpeed"]').select(otherSpeed, {force: true});
+				save();
+
+				// A form that "saves" without persisting is the classic plugin_settings defect.
+				openSettings();
+				cy.get(settingsForm + ' input[name="autoplayNext"]').should(autoplay ? 'not.be.checked' : 'be.checked');
+				cy.get(settingsForm + ' select[name="defaultSpeed"]').should('have.value', otherSpeed);
+
+				// Put them back as they were.
+				cy.get(settingsForm + ' input[name="autoplayNext"]').click({force: true});
+				cy.get(settingsForm + ' select[name="defaultSpeed"]').select(speed, {force: true});
+				save();
+				openSettings();
+				cy.get(settingsForm + ' input[name="autoplayNext"]').should(autoplay ? 'be.checked' : 'not.be.checked');
+				cy.get(settingsForm + ' select[name="defaultSpeed"]').should('have.value', speed);
 			});
 		});
 	});
 
-	it('Does not become a way around access control', function () {
-		// O plugin so responde dentro de CatalogBookHandler::download, que ja rodou
-		// a politica de acesso do OMP inteira: a politica de submissao publicada, o
-		// formato disponivel, a publicacao publicada e o preco do arquivo. O que
-		// este teste cobra e que ligar o parametro de streaming nao mude a resposta.
-		//
-		// O id invalido e derivado da URL real da faixa em vez de inventado: uma rota
-		// montada a mao cai antes, no roteador, e o teste passaria sem ter exercitado
-		// a politica de acesso nenhuma vez.
-		abrirLivroCom('.ojsbrAudioPlayerData', 'an audio publication format', () => {
-			cy.get('.ojsbrAudioPlayerData').invoke('attr', 'data-config').then((json) => {
-				const streamUrl = JSON.parse(json).formats[0].tracks[0].streamUrl;
-				const [caminho, query] = streamUrl.split('?');
-				const negado = caminho.replace(/\/\d+$/, '/999999');
+	(audioBookPage ? it : it.skip)('Builds the player from the audio publication format', function() {
+		cy.visit('/' + audioBookPage.replace(/^\//, ''));
+		// The server only sends the data; the rows and the bar are built by the script.
+		cy.get('.ojsbrAudioRow').should('have.length.at.least', 1);
+		cy.get('.ojsbrAudioRowButton').first().click();
+		// The bar is attached to the body, and so is the state class: it pushes the page footer up.
+		cy.get('.ojsbrAudioBar').should('exist');
+		cy.get('body').should('have.class', 'ojsbrAudioBarOpen');
+		cy.get('.ojsbrAudioTitle').should('not.have.text', '');
+	});
 
-				cy.request({url: negado, failOnStatusCode: false}).its('status').then((semParametro) => {
-					expect(semParametro, 'a file that does not belong to the format is refused').to.be.at.least(400);
-					cy.request({url: `${negado}?${query}`, failOnStatusCode: false})
-						.its('status').should('equal', semParametro);
-				});
+	(audioBookPage ? it : it.skip)('Answers a Range request with 206, which seeking depends on', function() {
+		cy.visit('/' + audioBookPage.replace(/^\//, ''));
+		firstTrack().then((track) => {
+			expect(track.streamUrl, 'the track URL carries the streaming parameter').to.contain('audioStream');
+
+			// A proxy that drops the Range header answers 200 here, and every drag of the bar
+			// downloads the whole file again.
+			request({url: track.streamUrl, headers: {Range: 'bytes=0-99'}}).then((response) => {
+				expect(response.status).to.equal(206);
+				expect(response.headers['content-range']).to.match(/^bytes 0-99\/\d+$/);
+				expect(response.headers['accept-ranges']).to.equal('bytes');
 			});
+
+			// An impossible range: 416, not 200 with the whole file.
+			request({url: track.streamUrl, headers: {Range: 'bytes=99999999999-'}, failOnStatusCode: false}).its('status').should('equal', 416);
 		});
 	});
 
-	/**
-	 * Leva ate a grade de plugins. Precisa ser chamado DE NOVO depois de cada
-	 * reload: a pagina volta para a aba Appearance, e o conteudo das outras abas
-	 * continua no DOM, apenas escondido — entao o seletor da grade ainda encontra
-	 * o elemento e o clique nao faz nada, sem erro nenhum.
-	 */
-	function abrirGradeDePlugins() {
-		cy.get('nav').contains('Settings').click();
-		// Ensure submenu item click despite animation
-		cy.get('nav').contains('Website').click({force: true});
-		cy.get('button[id="plugins-button"]').click();
-	}
+	(audioBookPage ? it : it.skip)('Does not become a way around access control', function() {
+		// The plugin only answers inside CatalogBookHandler::download, after OMP's whole
+		// access policy. Adding the streaming parameter must not change the answer. The
+		// refused id is derived from the real track URL: a URL made up by hand is refused
+		// by the router first, and the policy would never be exercised.
+		cy.visit('/' + audioBookPage.replace(/^\//, ''));
+		firstTrack().then((track) => {
+			const [path, query] = track.streamUrl.split('?');
+			const refused = path.replace(/\/\d+$/, '/999999');
 
-	/**
-	 * Abre o formulario de configuracoes do plugin na grade.
-	 *
-	 * A acao de configuracoes nao vive na linha visivel — o `row_actions` dela vem
-	 * vazio — e sim na linha de extras, que so e revelada pelo `show_extras`. Clicar
-	 * no link escondido com {force: true} ate ENCONTRA o elemento, mas o modal nao
-	 * abre e o teste falha depois, longe da causa. Por isso: revelar, depois clicar.
-	 * O toggle so e acionado quando o link ainda nao esta visivel, para o segundo
-	 * uso no mesmo teste nao voltar a esconder a linha.
-	 */
-	function abrirConfiguracoes() {
-		const link = 'a[id^="component-grid-settings-plugins-settingsplugingrid-category-generic-row-audioplayerplugin-settings-button-"]';
-		// Consultar a partir do body a cada chamada, e nao guardar a linha: a grade
-		// e redesenhada por AJAX e um <tr> capturado antes disso fica orfao — o
-		// .find() nele nao acha mais nada, e o erro aponta para o seletor errado.
-		cy.get('body').then(($b) => {
-			if (!$b.find(link).filter(':visible').length) {
-				cy.get('tr[id$="row-audioplayerplugin"] a.show_extras', {timeout: 20000}).click({force: true});
-			}
+			request({url: refused, failOnStatusCode: false}).its('status').then((withoutParameter) => {
+				expect(withoutParameter, 'a file that does not belong to the format is refused').to.be.at.least(400);
+				request({url: refused + '?' + query, failOnStatusCode: false}).its('status').should('equal', withoutParameter);
+			});
 		});
-		cy.waitJQuery();
-		cy.get(link).should('be.visible').click();
-	}
-
-	/**
-	 * Abre o primeiro livro do catalogo que satisfaz o seletor. Percorrer o
-	 * catalogo em vez de cravar um id mantem a suite util em qualquer base:
-	 * o conjunto da PKP muda de versao para versao.
-	 */
-	function abrirLivroCom(seletor, descricao, aoAchar) {
-		cy.visit('index.php/' + contexto + '/en/catalog');
-		cy.get('a[href*="/catalog/book/"]').then(($as) => {
-			const livros = Cypress._.uniq([...$as].map((a) => a.getAttribute('href')));
-			const teto = Math.min(livros.length, LIMITE);
-			if (livros.length > LIMITE) {
-				cy.log(`catalogo com ${livros.length} livros; olhando so os ${LIMITE} primeiros`);
-			}
-			const tentar = (i) => {
-				expect(i, `catalog has a book with ${descricao} among the first ${teto}`).to.be.lessThan(teto);
-				cy.visit(livros[i]);
-				cy.get('body').then(($b) => ($b.find(seletor).length ? aoAchar() : tentar(i + 1)));
-			};
-			tentar(0);
-		});
-	}
+	});
 });

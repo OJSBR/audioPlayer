@@ -6,6 +6,18 @@ version numbers follow the PKP four-part scheme used in `version.xml`.
 
 ## [Unreleased]
 
+## [1.0.2.0] - 2026-09-15
+
+### Changed
+- Hook callbacks return `Hook::CONTINUE` / `Hook::ABORT`; nothing is registered while the
+  site is under maintenance (`Application::isUnderMaintenance()`); at site level there is no
+  settings action.
+- Source comments, tests, the settings template and locale file headers follow the house
+  standard (English, standard copyright header); the empty `settings.xml` is gone.
+- Tests: PHPUnit on `PKPTestCase` with the standard suite; Cypress runs in PKP's continuous
+  integration on OMP and restores every setting it changes; tests are no longer part of the
+  release package.
+
 ## [1.0.1.1] - 2026-08-30
 
 ### Added
@@ -37,6 +49,6 @@ version numbers follow the PKP four-part scheme used in `version.xml`.
   before it reaches PHP, which turns every seek into a full re-download. The
   README documents the nginx snippet that forwards `Range` for this route.
 
-[Unreleased]: https://github.com/OJSBR/audioPlayerOmp/compare/1.0.1.1-omp3.5...stable-3_5_0
-[1.0.1.1]: https://github.com/OJSBR/audioPlayerOmp/releases/tag/1.0.1.1-omp3.5
-[1.0.1.0]: https://github.com/OJSBR/audioPlayerOmp/releases/tag/1.0.1.0-omp3.5
+[Unreleased]: https://github.com/OJSBR/audioPlayer/compare/1.0.1.1-omp3.5...stable-3_5_0
+[1.0.1.1]: https://github.com/OJSBR/audioPlayer/releases/tag/1.0.1.1-omp3.5
+[1.0.1.0]: https://github.com/OJSBR/audioPlayer/releases/tag/1.0.1.0-omp3.5
