@@ -1,10 +1,10 @@
 # audioPlayer — OMP plugin
 
 [![OMP](https://img.shields.io/badge/OMP-3.5-brightgreen)](https://pkp.sfu.ca/omp/)
-[![Version](https://img.shields.io/badge/version-1.0.2.0-blue)](version.xml)
+[![Version](https://img.shields.io/badge/version-5.0.0.0-blue)](version.xml)
 [![License](https://img.shields.io/badge/license-GPL--3.0-lightgrey)](LICENSE)
 
-**⬇️ Install package:** [OMP 3.5](https://github.com/OJSBR/audioPlayer/releases/download/1.0.2.0-omp3.5/audioPlayer-1.0.2.0-omp3.5.tar.gz) — or browse all [Releases](../../releases).
+**⬇️ Install package:** [OMP 3.5](https://github.com/OJSBR/audioPlayer/releases/download/5.0.0.0/audioPlayer-5.0.0.0.tar.gz) — or browse all [Releases](../../releases).
 
 **▶️ Live demo:** [Editora UEMG — audiobook with 26 tracks](https://ebooks.editora.uemg.br/editora/pt_BR/catalog/book/5)
 
@@ -20,7 +20,7 @@ listener stopped. The original download button is left untouched.
 
 | Application | Version | Branch | Plugin release |
 |-------------|---------|--------|----------------|
-| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(default)* | 1.0.2.0 |
+| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(default)* | 5.0.0.0 |
 
 ## What it does
 
@@ -149,7 +149,7 @@ parou. O botão de download original **não é alterado**.
 
 | Aplicação | Versão | Branch | Release do plugin |
 |-----------|--------|--------|-------------------|
-| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(padrão)* | 1.0.2.0 |
+| OMP | 3.5.x | [`stable-3_5_0`](../../tree/stable-3_5_0) *(padrão)* | 5.0.0.0 |
 
 ### O que faz
 

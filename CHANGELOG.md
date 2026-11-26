@@ -6,6 +6,13 @@ version numbers follow the PKP four-part scheme used in `version.xml`.
 
 ## [Unreleased]
 
+## [5.0.0.0] - 2026-11-26
+
+### Changed
+- Renumbered: the first number now names the application line (5 = 3.5, 4 = 3.4,
+  3 = 3.3), so an installation that upgrades the application is always offered the
+  newer line. No code changes since the previous release.
+
 ## [1.0.2.0] - 2026-09-15
 
 ### Changed
